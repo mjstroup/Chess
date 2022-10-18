@@ -155,14 +155,16 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (movingPiece instanceof King && Math.abs(destination.getC() - movingPiece.getC()) > 1) {
             if (destination.getC() == 6) {
                 //king side
-                System.out.println(pieces[7][4]);
+                //rook
                 pieces[7][5] = pieces[7][7];
                 pieces[7][5].setLocation(7, 5);
+                //king
                 pieces[7][6] = pieces[7][4];
                 pieces[7][6].setLocation(7, 6);
-                pieces[7][4] = new EmptySquare(7, 4);
+                //empty king and rook orig squares
                 pieces[7][7] = new EmptySquare(7, 7);
-                System.out.println(pieces[7][6]);
+                pieces[7][4] = new EmptySquare(7, 4);
+
                 pieceToComponent(pieces[7][7]).getParent().remove(0);
                 JLabel label = new JLabel();
                 Image image = (new ImageIcon(pieces[7][5].fileName)).getImage();
@@ -173,6 +175,24 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 return;
             } else if (destination.getC() == 2) {
                 //queen side
+                //rook
+                pieces[7][3] = pieces[7][0];
+                pieces[7][3].setLocation(7, 3);
+                //king
+                pieces[7][2] = pieces[7][4];
+                pieces[7][2].setLocation(7, 2);
+                //empty king and rook orig squares
+                pieces[7][0] = new EmptySquare(7, 0);
+                pieces[7][4] = new EmptySquare(7, 4);
+
+                pieceToComponent(pieces[7][0]).getParent().remove(0);
+                JLabel label = new JLabel();
+                Image image = (new ImageIcon(pieces[7][3].fileName)).getImage();
+                image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+                label.setIcon(new ImageIcon(image));
+                ((JPanel)pieceToComponent(pieces[7][3])).add(label);
+                repaint();
+                return;
             }
         }
         if (movingPiece instanceof Pawn && (destination.getR() == 0 || destination.getR() == 7)) {
