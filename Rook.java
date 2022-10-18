@@ -9,6 +9,7 @@ public class Rook extends Piece {
     }
     @Override
     public ArrayList<Piece> getPossibleMoves() {
+        //TODO: remove castle rights when rook moves
         ArrayList<Piece> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;

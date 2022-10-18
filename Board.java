@@ -52,14 +52,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 }
             }
         }
-
-        
-        layeredPane.repaint();
-        layeredPane.revalidate();
-        this.repaint();
-        this.revalidate();
-        chessBoard.repaint();
-        chessBoard.revalidate();
     }
 
     public void mousePressed(MouseEvent me) {
@@ -74,8 +66,14 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         layeredPane.add(piece, JLayeredPane.DRAG_LAYER);
         currentPanel = (JPanel)chessBoard.findComponentAt(me.getX(), me.getY());
         originalPanel = (JPanel)chessBoard.findComponentAt(me.getX(), me.getY());
+        if (isWhitePanel(originalPanel))
+            originalPanel.setBackground(lightCover);
+        else
+            originalPanel.setBackground(darkCover);
         currentPiece = componentToPiece(currentPanel);
         currentMoves = currentPiece.getPossibleMoves();
+        System.out.println(currentPiece);
+        System.out.println(currentMoves);
     }
 
     public void mouseDragged(MouseEvent me) {
@@ -83,7 +81,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (piece == null) return;
         piece.setLocation(me.getX() - 49, me.getY() - 45);
         Component c = chessBoard.findComponentAt(me.getX(), me.getY());
-        if (!currentPanel.equals(c))
+        if (!currentPanel.equals(c) && !currentPanel.equals(originalPanel))
             if (isWhitePanel(currentPanel))
                 currentPanel.setBackground(light);
             else 
@@ -95,8 +93,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         } else {
             currentPanel = (JPanel)c;
         }
-        // System.out.println(currentMoves);
-        // System.out.println(currentPanelPiece);
         if (currentPanel instanceof JPanel)
             if (currentPanelPiece != null && currentMoves.contains(currentPanelPiece))
                 if (isWhitePanel(currentPanel)) 
@@ -140,6 +136,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             currentPanel.setBackground(light);
         else
             currentPanel.setBackground(dark);
+        if (isWhitePanel(originalPanel))
+            originalPanel.setBackground(light);
+        else
+            originalPanel.setBackground(dark);
         piece = null;
         currentPiece = null;
         currentPanel = null;
@@ -151,22 +151,46 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public void movePiece(Piece movingPiece, Piece destination) {
         if (movingPiece.equals(destination)) return;
-        if (movingPiece instanceof Pawn && (destination.getX() == 0 || destination.getX() == 7)) {
+        //castle
+        if (movingPiece instanceof King && Math.abs(destination.getC() - movingPiece.getC()) > 1) {
+            if (destination.getC() == 6) {
+                //king side
+                System.out.println(pieces[7][4]);
+                pieces[7][5] = pieces[7][7];
+                pieces[7][5].setLocation(7, 5);
+                pieces[7][6] = pieces[7][4];
+                pieces[7][6].setLocation(7, 6);
+                pieces[7][4] = new EmptySquare(7, 4);
+                pieces[7][7] = new EmptySquare(7, 7);
+                System.out.println(pieces[7][6]);
+                pieceToComponent(pieces[7][7]).getParent().remove(0);
+                JLabel label = new JLabel();
+                Image image = (new ImageIcon(pieces[7][5].fileName)).getImage();
+                image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+                label.setIcon(new ImageIcon(image));
+                ((JPanel)pieceToComponent(pieces[7][5])).add(label);
+                repaint();
+                return;
+            } else if (destination.getC() == 2) {
+                //queen side
+            }
+        }
+        if (movingPiece instanceof Pawn && (destination.getR() == 0 || destination.getR() == 7)) {
             //TODO: under promotion
-            pieces[destination.getX()][destination.getY()] = new Queen(destination.getX() == 0, 0, destination.getY());
-            currentPiece = pieces[destination.getX()][destination.getY()];
+            pieces[destination.getR()][destination.getC()] = new Queen(destination.getR() == 0, 0, destination.getC());
+            currentPiece = pieces[destination.getR()][destination.getC()];
             Image image = (new ImageIcon(currentPiece.fileName)).getImage();
             image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
             piece.setIcon(new ImageIcon(image));
         }
         else 
-            pieces[destination.getX()][destination.getY()] = pieces[movingPiece.getX()][movingPiece.getY()];
-        pieces[movingPiece.getX()][movingPiece.getY()] = new EmptySquare(movingPiece.getX(), movingPiece.getY());
-        movingPiece.setLocation(destination.getX(), destination.getY());
+            pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
+        pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
+        movingPiece.setLocation(destination.getR(), destination.getC());
     }
     public String pieceToCoords(Piece p) {
-        int x = p.getX();
-        int y = p.getY();
+        int x = p.getR();
+        int y = p.getC();
         String s = "";
         switch (y) {
             case 0: s+="A"; break;
@@ -204,6 +228,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public Piece componentToPiece(Component c) {
         return pieces[c.getY()/99][c.getX()/99];
+    }
+
+    public Component pieceToComponent(Piece p) {
+        return chessBoard.findComponentAt(p.getC()*99+50, p.getR()*99+50);
     }
     public boolean isWhitePanel(Component c) {
         return (c.getX()+50/99 + c.getY()+50/99) % 2 == 0;

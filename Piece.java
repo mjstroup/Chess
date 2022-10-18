@@ -18,10 +18,10 @@ public class Piece {
         this.rlocation = x;
         this.clocation = y;
     }
-    public int getX() {
+    public int getR() {
         return rlocation;
     }
-    public int getY() {
+    public int getC() {
         return clocation;
     }
 }

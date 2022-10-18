@@ -12,6 +12,7 @@ public class Bishop extends Piece {
         ArrayList<Piece> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
+        list.add(Board.pieces[4][4]);
         return list;
     }
 }
