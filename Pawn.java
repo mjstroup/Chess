@@ -12,7 +12,7 @@ public class Pawn extends Piece {
         ArrayList<Piece> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
-        //TODO: en passant 
+        //TODO: en passant
         if (this.white) {
             //captures
             Piece topLeft = null;

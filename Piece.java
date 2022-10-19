@@ -7,6 +7,9 @@ public class Piece {
     public int clocation;
     public ArrayList<Piece> getPossibleMoves(){return null;}
     public ArrayList<Piece> getAttackingMoves(){return null;}
+    //TODO: implement FEN format
+    //for example: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+    //indicating (pieces) (color to move) (castling availability) (en passant pawn) (half move) (full move)
     public static final Piece[][] newBoard = new Piece[][]{{new Rook(false, 0, 0), new Knight(false, 0, 1), new Bishop(false, 0, 2), new Queen(false, 0, 3), new King(false, 0, 4), new Bishop(false, 0, 5), new Knight(false, 0, 6), new Rook(false, 0, 7)},
                                                            {new Pawn(false, 1, 0), new Pawn(false, 1, 1), new Pawn(false, 1, 2), new Pawn(false, 1, 3), new Pawn(false, 1, 4), new Pawn(false, 1, 5), new Pawn(false, 1, 6), new Pawn(false, 1, 7)},
                                                            {new EmptySquare(2, 0), new EmptySquare(2, 1), new EmptySquare(2, 2), new EmptySquare(2, 3), new EmptySquare(2, 4), new EmptySquare(2, 5), new EmptySquare(2, 6), new EmptySquare(2, 7)},

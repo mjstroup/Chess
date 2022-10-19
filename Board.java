@@ -147,7 +147,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         originalPanel = null;
         if (!returned) {
             whiteTurn = !whiteTurn;
-            // checkmate check
+            //TODO: insufficient material check
+            //TODO: 50 move rule (including pawn pushes and halfmoves)
+            //TODO: 3 move check
+            //checkmate check
             boolean checkmate = true;
             boolean stalemate = false;
             for (int i = 0; i < pieces.length; i++) {
