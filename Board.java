@@ -12,13 +12,13 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public static boolean whiteTurn = true;
     public static Piece[][] pieces;
-    Piece currentPiece;
-    ArrayList<Piece> currentMoves;
-    JLayeredPane layeredPane;
-    JPanel chessBoard;
-    JLabel piece;
-    JPanel currentPanel;
-    JPanel originalPanel;
+    private Piece currentPiece;
+    private ArrayList<Piece> currentMoves;
+    private JLayeredPane layeredPane;
+    private JPanel chessBoard;
+    private JLabel piece;
+    private JPanel currentPanel;
+    private JPanel originalPanel;
 
     public Board(Piece[][] pieceList) {
         pieces = pieceList;
@@ -145,8 +145,36 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         currentPanel = null;
         currentMoves = null;
         originalPanel = null;
-        if (!returned)
+        if (!returned) {
             whiteTurn = !whiteTurn;
+            // checkmate check
+            boolean checkmate = true;
+            boolean stalemate = false;
+            for (int i = 0; i < pieces.length; i++) {
+                for (int j = 0; j < pieces[0].length; j++) {
+                    Piece p = pieces[i][j];
+                    if (p.white != movingPiece.white && p.getPossibleMoves().size() != 0) {
+                        checkmate = false;
+                        stalemate = false;
+                    }
+                    if (p.white != movingPiece.white && p instanceof King)
+                        if (p.white && !p.isAttackedByBlack())
+                            stalemate = true;
+                        else if (!p.isAttackedByWhite())
+                            stalemate = true;
+                }
+            }
+            if (checkmate && stalemate) {
+                //stalemate
+                dispose();
+                System.out.println("Stalemate.");
+            } else if (checkmate) {
+                //checkmate
+                dispose();
+                String winner = whiteTurn ? "black" : "white";
+                System.out.println("Checkmate for " + winner + ".");
+            }
+        }
     }
 
     public void movePiece(Piece movingPiece, Piece destination) {
@@ -216,6 +244,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 return;
             }
         }
+        //pawn promote
         if (movingPiece instanceof Pawn && (destination.getR() == 0 || destination.getR() == 7)) {
             //TODO: under promotion
             pieces[destination.getR()][destination.getC()] = new Queen(destination.getR() == 0, 0, destination.getC());
@@ -223,9 +252,9 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             Image image = (new ImageIcon(currentPiece.fileName)).getImage();
             image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
             piece.setIcon(new ImageIcon(image));
-        }
-        else 
+        } else 
             pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
+        //now move
         pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
         movingPiece.setLocation(destination.getR(), destination.getC());
     }

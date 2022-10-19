@@ -48,6 +48,21 @@ public class Pawn extends Piece {
             if (aheadByOne instanceof EmptySquare)
                 list.add(aheadByOne);
         }
+
+        //check test
+        checkTest(list);
+        return list;
+    }
+    @Override
+    public ArrayList<Piece> getAttackingMoves() {
+        ArrayList<Piece> list = new ArrayList<>();
+        int offset = this.white ? -1 : 1;
+        if (clocation != 0) {
+            list.add(Board.pieces[rlocation + offset][clocation-1]);
+        }
+        if (clocation != 7) {
+            list.add(Board.pieces[rlocation + offset][clocation+1]);
+        }
         return list;
     }
 }

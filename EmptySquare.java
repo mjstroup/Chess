@@ -9,4 +9,9 @@ public class EmptySquare extends Piece {
         ArrayList<Piece> list = new ArrayList<>();
         return list;
     }
+    @Override
+    public ArrayList<Piece> getAttackingMoves() {
+        ArrayList<Piece> list = new ArrayList<>();
+        return list;
+    }
 }

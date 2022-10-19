@@ -12,6 +12,15 @@ public class Bishop extends Piece {
         ArrayList<Piece> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
+        list.addAll(this.getAttackingMoves());
+        list.removeIf(p -> (!(p instanceof EmptySquare) && p.white == this.white));
+        //check test
+        checkTest(list);
+        return list;
+    }
+    @Override
+    public ArrayList<Piece> getAttackingMoves() {
+        ArrayList<Piece> list = new ArrayList<>();
         boolean topLeft = true, topRight = true, bottomLeft = true, bottomRight = true;
         for (int i = 1; i < 8; i++) {
             if (!(topLeft || topRight || bottomLeft || bottomRight)) break;
@@ -23,10 +32,8 @@ public class Bishop extends Piece {
                     topLeft = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(p);
-                } else if (p.white != this.white) {
+                } else {
                     list.add(p);
-                    topLeft = false;
-                } else if (p.white == this.white) {
                     topLeft = false;
                 }
             }
@@ -38,10 +45,8 @@ public class Bishop extends Piece {
                     topRight = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(p);
-                } else if (p.white != this.white) {
+                } else {
                     list.add(p);
-                    topRight = false;
-                } else if (p.white == this.white) {
                     topRight = false;
                 }
             }
@@ -53,10 +58,8 @@ public class Bishop extends Piece {
                     bottomLeft = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(p);
-                } else if (p.white != this.white) {
+                } else {
                     list.add(p);
-                    bottomLeft = false;
-                } else if (p.white == this.white) {
                     bottomLeft = false;
                 }
             }
@@ -68,10 +71,8 @@ public class Bishop extends Piece {
                     bottomRight = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(p);
-                } else if (p.white != this.white) {
+                } else {
                     list.add(p);
-                    bottomRight = false;
-                } else if (p.white == this.white) {
                     bottomRight = false;
                 }
             }

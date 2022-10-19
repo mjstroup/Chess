@@ -2,6 +2,7 @@ import java.util.*;
 public class King extends Piece {
     public boolean queenCastleRights = true;
     public boolean kingCastleRights = true;
+    public boolean inCheck = false;
     public King (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
         this.clocation = clocation;
@@ -37,6 +38,9 @@ public class King extends Piece {
                     list.add(Board.pieces[r][c]);
             }
         }
+        
+        //check test
+        checkTest(list);
         return list;
     }
     public void removeQueenCastleRights() {
@@ -44,5 +48,18 @@ public class King extends Piece {
     }
     public void removeKingCastleRights() {
         this.kingCastleRights = false;
+    }
+    @Override
+    public ArrayList<Piece> getAttackingMoves() {
+        ArrayList<Piece> list = new ArrayList<>();
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                int r = rlocation + i;
+                int c = clocation + j;
+                if (r <= 7 && r >= 0 && c <= 7 && c >= 0)
+                    list.add(Board.pieces[r][c]);
+            }
+        }
+        return list;
     }
 }

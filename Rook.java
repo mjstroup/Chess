@@ -9,10 +9,18 @@ public class Rook extends Piece {
     }
     @Override
     public ArrayList<Piece> getPossibleMoves() {
-        //TODO: remove castle rights when rook moves
         ArrayList<Piece> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
+        list.addAll(this.getAttackingMoves());
+        list.removeIf(p -> (!(p instanceof EmptySquare) && p.white == this.white));
+        //check test
+        checkTest(list);
+        return list;
+    }
+    @Override
+    public ArrayList<Piece> getAttackingMoves() {
+        ArrayList<Piece> list = new ArrayList<>();
         boolean left = true, up = true, right = true, down = true;
         for (int i = 1; i < 8; i++) {
             if (!(left || up || right || down)) break;
@@ -24,10 +32,8 @@ public class Rook extends Piece {
                     left = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(p);
-                } else if (p.white != this.white) {
+                } else {
                     list.add(p);
-                    left = false;
-                } else if (p.white == this.white) {
                     left = false;
                 }
             }
@@ -39,10 +45,8 @@ public class Rook extends Piece {
                     up = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(p);
-                } else if (p.white != this.white) {
+                } else {
                     list.add(p);
-                    up = false;
-                } else if (p.white == this.white) {
                     up = false;
                 }
             }
@@ -54,10 +58,8 @@ public class Rook extends Piece {
                     right = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(p);
-                } else if (p.white != this.white) {
+                } else {
                     list.add(p);
-                    right = false;
-                } else if (p.white == this.white) {
                     right = false;
                 }
             }
@@ -69,10 +71,8 @@ public class Rook extends Piece {
                     down = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(p);
-                } else if (p.white != this.white) {
+                } else {
                     list.add(p);
-                    down = false;
-                } else if (p.white == this.white) {
                     down = false;
                 }
             }
