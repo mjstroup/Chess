@@ -15,17 +15,18 @@ public class King extends Piece {
         if (Board.whiteTurn != this.white)
             return list;
 
-        //white castle
-        if (this.white && (this.kingCastleRights || this.queenCastleRights)) {
+        //castle
+        int row = this.white ? 7 : 0;
+        if (this.kingCastleRights || this.queenCastleRights) {
             //castle king
-            //ensure f1 g1 are empty
-            if (Board.pieces[7][5] instanceof EmptySquare && Board.pieces[7][6] instanceof EmptySquare && this.kingCastleRights) {
-                list.add(Board.pieces[7][6]);
+            //ensure adjacent are empty
+            if (Board.pieces[row][5] instanceof EmptySquare && Board.pieces[row][6] instanceof EmptySquare && this.kingCastleRights) {
+                list.add(Board.pieces[row][6]);
             }
             //castle queen
-            //ensure b1 c1 d1 are empty
-            if (Board.pieces[7][1] instanceof EmptySquare && Board.pieces[7][2] instanceof EmptySquare && Board.pieces[7][3] instanceof EmptySquare && this.queenCastleRights) {
-                list.add(Board.pieces[7][2]);
+            //ensure adjacent are empty
+            if (Board.pieces[row][1] instanceof EmptySquare && Board.pieces[row][2] instanceof EmptySquare && Board.pieces[row][3] instanceof EmptySquare && this.queenCastleRights) {
+                list.add(Board.pieces[row][2]);
             }
         }
         for (int i = -1; i < 2; i++) {
@@ -37,5 +38,11 @@ public class King extends Piece {
             }
         }
         return list;
+    }
+    public void removeQueenCastleRights() {
+        this.queenCastleRights = false;
+    }
+    public void removeKingCastleRights() {
+        this.kingCastleRights = false;
     }
 }

@@ -151,46 +151,67 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public void movePiece(Piece movingPiece, Piece destination) {
         if (movingPiece.equals(destination)) return;
+        //remove castle rights
+        if (movingPiece instanceof King) {
+            ((King)movingPiece).removeKingCastleRights();
+            ((King)movingPiece).removeQueenCastleRights();
+        }
+        if (movingPiece instanceof Rook && (movingPiece == pieces[7][0] || movingPiece == pieces[7][7]) && movingPiece.white) {
+            if (pieces[7][4] instanceof King) {
+                if (movingPiece == pieces[7][0])
+                    ((King)pieces[7][4]).removeQueenCastleRights();
+                else
+                    ((King)pieces[7][4]).removeKingCastleRights(); 
+            }
+        } else if (movingPiece instanceof Rook && (movingPiece == pieces[0][0] || movingPiece == pieces[0][7]) && !movingPiece.white) {
+            if (pieces[0][4] instanceof King) {
+                if (movingPiece == pieces[0][0])
+                    ((King)pieces[0][4]).removeQueenCastleRights();
+                else
+                    ((King)pieces[0][4]).removeKingCastleRights(); 
+            }
+        }
         //castle
         if (movingPiece instanceof King && Math.abs(destination.getC() - movingPiece.getC()) > 1) {
+            int row = movingPiece.white ? 7 : 0;
             if (destination.getC() == 6) {
                 //king side
                 //rook
-                pieces[7][5] = pieces[7][7];
-                pieces[7][5].setLocation(7, 5);
+                pieces[row][5] = pieces[row][7];
+                pieces[row][5].setLocation(row, 5);
                 //king
-                pieces[7][6] = pieces[7][4];
-                pieces[7][6].setLocation(7, 6);
+                pieces[row][6] = pieces[row][4];
+                pieces[row][6].setLocation(row, 6);
                 //empty king and rook orig squares
-                pieces[7][7] = new EmptySquare(7, 7);
-                pieces[7][4] = new EmptySquare(7, 4);
+                pieces[row][7] = new EmptySquare(row, 7);
+                pieces[row][4] = new EmptySquare(row, 4);
 
-                pieceToComponent(pieces[7][7]).getParent().remove(0);
+                pieceToComponent(pieces[row][7]).getParent().remove(0);
                 JLabel label = new JLabel();
-                Image image = (new ImageIcon(pieces[7][5].fileName)).getImage();
+                Image image = (new ImageIcon(pieces[row][5].fileName)).getImage();
                 image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
                 label.setIcon(new ImageIcon(image));
-                ((JPanel)pieceToComponent(pieces[7][5])).add(label);
+                ((JPanel)pieceToComponent(pieces[row][5])).add(label);
                 repaint();
                 return;
             } else if (destination.getC() == 2) {
                 //queen side
                 //rook
-                pieces[7][3] = pieces[7][0];
-                pieces[7][3].setLocation(7, 3);
+                pieces[row][3] = pieces[row][0];
+                pieces[row][3].setLocation(row, 3);
                 //king
-                pieces[7][2] = pieces[7][4];
-                pieces[7][2].setLocation(7, 2);
+                pieces[row][2] = pieces[row][4];
+                pieces[row][2].setLocation(row, 2);
                 //empty king and rook orig squares
-                pieces[7][0] = new EmptySquare(7, 0);
-                pieces[7][4] = new EmptySquare(7, 4);
+                pieces[row][0] = new EmptySquare(row, 0);
+                pieces[row][4] = new EmptySquare(row, 4);
 
-                pieceToComponent(pieces[7][0]).getParent().remove(0);
+                pieceToComponent(pieces[row][0]).getParent().remove(0);
                 JLabel label = new JLabel();
-                Image image = (new ImageIcon(pieces[7][3].fileName)).getImage();
+                Image image = (new ImageIcon(pieces[row][3].fileName)).getImage();
                 image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
                 label.setIcon(new ImageIcon(image));
-                ((JPanel)pieceToComponent(pieces[7][3])).add(label);
+                ((JPanel)pieceToComponent(pieces[row][3])).add(label);
                 repaint();
                 return;
             }

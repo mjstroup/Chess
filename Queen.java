@@ -12,7 +12,8 @@ public class Queen extends Piece {
         ArrayList<Piece> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
-        list.add(Board.pieces[4][5]);
+        list.addAll(new Rook(this.white, this.getR(), this.getC()).getPossibleMoves());
+        list.addAll(new Bishop(this.white, this.getR(), this.getC()).getPossibleMoves());
         return list;
     }
 }
