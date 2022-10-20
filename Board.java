@@ -77,6 +77,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void mouseDragged(MouseEvent me) {
+        //TODO: add colored squares for possible moves
         if (!SwingUtilities.isLeftMouseButton(me)) return;
         if (piece == null) return;
         piece.setLocation(me.getX() - 49, me.getY() - 45);
@@ -102,6 +103,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void mouseReleased(MouseEvent me) {
+        //TODO: add sound
+        //TODO: add colored squares marking previous move
         if (!SwingUtilities.isLeftMouseButton(me)) return;
         if (piece == null) return;
         Component c = chessBoard.findComponentAt(me.getX(), me.getY());

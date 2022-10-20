@@ -2,7 +2,6 @@ import java.util.*;
 public class King extends Piece {
     public boolean queenCastleRights = true;
     public boolean kingCastleRights = true;
-    public boolean inCheck = false;
     public King (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
         this.clocation = clocation;
@@ -17,17 +16,38 @@ public class King extends Piece {
             return list;
 
         //castle
-        int row = this.white ? 7 : 0;
+        //TODO: castle through check
         if (this.kingCastleRights || this.queenCastleRights) {
             //castle king
             //ensure adjacent are empty
-            if (Board.pieces[row][5] instanceof EmptySquare && Board.pieces[row][6] instanceof EmptySquare && this.kingCastleRights) {
-                list.add(Board.pieces[row][6]);
-            }
-            //castle queen
-            //ensure adjacent are empty
-            if (Board.pieces[row][1] instanceof EmptySquare && Board.pieces[row][2] instanceof EmptySquare && Board.pieces[row][3] instanceof EmptySquare && this.queenCastleRights) {
-                list.add(Board.pieces[row][2]);
+            if (this.white) {
+                Piece a1 = Board.pieces[7][0];
+                Piece b1 = Board.pieces[7][1];
+                Piece c1 = Board.pieces[7][2];
+                Piece d1 = Board.pieces[7][3];
+                Piece f1 = Board.pieces[7][5];
+                Piece g1 = Board.pieces[7][6];
+                Piece h1 = Board.pieces[7][7];
+                if (d1 instanceof EmptySquare && c1 instanceof EmptySquare && b1 instanceof EmptySquare && a1 instanceof Rook && a1.white && !this.isAttackedByBlack() && !d1.isAttackedByBlack() && !c1.isAttackedByBlack() && !b1.isAttackedByBlack() && this.queenCastleRights) {
+                    list.add(c1);
+                }
+                if (f1 instanceof EmptySquare && g1 instanceof EmptySquare && h1 instanceof Rook && h1.white && !this.isAttackedByBlack() && !f1.isAttackedByBlack() && !g1.isAttackedByBlack() && this.kingCastleRights) {
+                    list.add(g1);
+                }
+            } else {
+                Piece a8 = Board.pieces[0][0];
+                Piece b8 = Board.pieces[0][1];
+                Piece c8 = Board.pieces[0][2];
+                Piece d8 = Board.pieces[0][3];
+                Piece f8 = Board.pieces[0][5];
+                Piece g8 = Board.pieces[0][6];
+                Piece h8 = Board.pieces[0][7];
+                if (d8 instanceof EmptySquare && c8 instanceof EmptySquare && b8 instanceof EmptySquare && a8 instanceof Rook && !a8.white && !this.isAttackedByWhite() && !d8.isAttackedByWhite() && !c8.isAttackedByWhite() && !b8.isAttackedByWhite() && this.queenCastleRights) {
+                    list.add(c8);
+                }
+                if (f8 instanceof EmptySquare && g8 instanceof EmptySquare && h8 instanceof Rook && !h8.white && !this.isAttackedByWhite() && !f8.isAttackedByWhite() && !g8.isAttackedByWhite() && this.kingCastleRights) {
+                    list.add(g8);
+                }
             }
         }
         for (int i = -1; i < 2; i++) {
