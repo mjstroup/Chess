@@ -3,12 +3,16 @@ import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
+import java.io.*;
+import javax.sound.sampled.*;
 
 public class Board extends JFrame  implements MouseListener, MouseMotionListener{
     final Color light = new Color(240,217,181);
     final Color dark = new Color(181,136,99);
     final Color lightCover = new Color(174,177,136);
     final Color darkCover = new Color(133,120,78);
+    final Color previousMoveOriginalColor = new Color(206,175,104);
+    final Color previousMoveDestColor = new Color(215,205,118);
 
     public static boolean whiteTurn = true;
     public static Piece[][] pieces;
@@ -16,9 +20,13 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private ArrayList<Piece> currentMoves;
     private JLayeredPane layeredPane;
     private JPanel chessBoard;
-    private JLabel piece;
-    private JPanel currentPanel;
     private JPanel originalPanel;
+    private JPanel currentPanel;
+    private Color currentPanelColor;
+    private JPanel previousMoveOriginalPanel;
+    private JPanel previousMoveCurrentPanel;
+    private JLabel piece;
+    private boolean moveIsCapture = false;
 
     public Board(Piece[][] pieceList) {
         pieces = pieceList;
@@ -65,6 +73,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         piece.setSize(piece.getWidth(), piece.getHeight());
         layeredPane.add(piece, JLayeredPane.DRAG_LAYER);
         currentPanel = (JPanel)chessBoard.findComponentAt(me.getX(), me.getY());
+        currentPanelColor = currentPanel.getBackground();
         originalPanel = (JPanel)chessBoard.findComponentAt(me.getX(), me.getY());
         if (isWhitePanel(originalPanel))
             originalPanel.setBackground(lightCover);
@@ -77,16 +86,24 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void mouseDragged(MouseEvent me) {
-        //TODO: add colored squares for possible moves
         if (!SwingUtilities.isLeftMouseButton(me)) return;
         if (piece == null) return;
         piece.setLocation(me.getX() - 49, me.getY() - 45);
         Component c = chessBoard.findComponentAt(me.getX(), me.getY());
-        if (!currentPanel.equals(c) && !currentPanel.equals(originalPanel))
-            if (isWhitePanel(currentPanel))
-                currentPanel.setBackground(light);
-            else 
-                currentPanel.setBackground(dark);
+        //in different panel now... change old panel to original color and mark new color
+        if (!currentPanel.equals(c)) {
+            currentPanel.setBackground(currentPanelColor);
+            if (c instanceof JLabel) {
+                currentPanelColor = ((JPanel)c.getParent()).getBackground();
+            } else {
+                currentPanelColor = c.getBackground();
+            }
+        }
+        //ensure that the original panel stays lit up for show
+        if (isWhitePanel(originalPanel))
+            originalPanel.setBackground(lightCover);
+        else
+            originalPanel.setBackground(darkCover);
         Piece currentPanelPiece = componentToPiece(c);
         if (c instanceof JLabel) {
             currentPanel = (JPanel)c.getParent();
@@ -94,6 +111,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         } else {
             currentPanel = (JPanel)c;
         }
+        //light up current panel
         if (currentPanel instanceof JPanel)
             if (currentPanelPiece != null && currentMoves.contains(currentPanelPiece))
                 if (isWhitePanel(currentPanel)) 
@@ -103,8 +121,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void mouseReleased(MouseEvent me) {
-        //TODO: add sound
-        //TODO: add colored squares marking previous move
         if (!SwingUtilities.isLeftMouseButton(me)) return;
         if (piece == null) return;
         Component c = chessBoard.findComponentAt(me.getX(), me.getY());
@@ -114,6 +130,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (c instanceof JLabel) {
             destination = componentToPiece(c.getParent());
         }
+        //if this move is not possible... *poof*
         if(!currentMoves.contains(destination)) {
             currentPanel = originalPanel;
             c = originalPanel;
@@ -135,20 +152,42 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
         System.out.println(movingPiece.abbreviation + pieceToCoords(destination));
 
-        if (isWhitePanel(currentPanel))
-            currentPanel.setBackground(light);
-        else
-            currentPanel.setBackground(dark);
+        currentPanel.setBackground(currentPanelColor);
         if (isWhitePanel(originalPanel))
             originalPanel.setBackground(light);
         else
             originalPanel.setBackground(dark);
-        piece = null;
-        currentPiece = null;
-        currentPanel = null;
-        currentMoves = null;
-        originalPanel = null;
+        //did the move really happen..
         if (!returned) {
+            //play sound
+            if (moveIsCapture)
+                playSound("./Sounds/Capture.wav");
+            else
+                playSound("./Sounds/Move.wav");
+            
+            //update the colors for previous move
+            originalPanel.setBackground(previousMoveOriginalColor);
+            currentPanel.setBackground(previousMoveDestColor);
+            //set previous (previous) move panels to original color unless its equal to one of the above
+            if (previousMoveOriginalPanel != null && previousMoveOriginalPanel != currentPanel && previousMoveOriginalPanel != originalPanel) {
+                if (((previousMoveOriginalPanel.getX()+previousMoveOriginalPanel.getY())/99)%2 == 0) {
+                    previousMoveOriginalPanel.setBackground(light);
+                } else {
+                    previousMoveOriginalPanel.setBackground(dark);
+                }
+            }
+            if (previousMoveCurrentPanel != null && previousMoveCurrentPanel != currentPanel && previousMoveCurrentPanel != originalPanel) {
+                if (((previousMoveCurrentPanel.getX()+previousMoveCurrentPanel.getY())/99)%2 == 0) {
+                    previousMoveCurrentPanel.setBackground(light);
+                } else {
+                    previousMoveCurrentPanel.setBackground(dark);
+                }
+            }
+            //re-mark these variables
+            previousMoveOriginalPanel = originalPanel;
+            previousMoveCurrentPanel = currentPanel;
+
+            
             whiteTurn = !whiteTurn;
             //TODO: insufficient material check
             //TODO: 50 move rule (including pawn pushes and halfmoves)
@@ -181,9 +220,18 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 System.out.println("Checkmate for " + winner + ".");
             }
         }
+        piece = null;
+        currentPiece = null;
+        currentPanel = null;
+        currentPanelColor = null;
+        currentMoves = null;
+        originalPanel = null;
+        moveIsCapture = false;
     }
 
     public void movePiece(Piece movingPiece, Piece destination) {
+        if (!(destination instanceof EmptySquare))
+            moveIsCapture = true;
         if (movingPiece.equals(destination)) return;
         //remove castle rights
         if (movingPiece instanceof King) {
@@ -258,9 +306,12 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             Image image = (new ImageIcon(currentPiece.fileName)).getImage();
             image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
             piece.setIcon(new ImageIcon(image));
-        } else 
-            pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
+            pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
+            movingPiece.setLocation(destination.getR(), destination.getC());
+            return;
+        }
         //now move
+        pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
         pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
         movingPiece.setLocation(destination.getR(), destination.getC());
     }
@@ -312,7 +363,26 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     public boolean isWhitePanel(Component c) {
         return (c.getX()+50/99 + c.getY()+50/99) % 2 == 0;
     }
-    
+
+    /*
+     * https://stackoverflow.com/a/26318
+     */
+    public void playSound(String fileName) {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Clip clip = AudioSystem.getClip();
+                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+                    Board.class.getResourceAsStream(fileName));
+                    clip.open(inputStream);
+                    clip.start();
+                } catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
+                    System.err.println(e.getMessage());
+                }
+            }
+        }).start();
+    }
+
     public static void main(String[] args) {
         Board b = new Board(Piece.newBoard);
         b.setDefaultCloseOperation(DISPOSE_ON_CLOSE);

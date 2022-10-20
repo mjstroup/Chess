@@ -16,7 +16,6 @@ public class King extends Piece {
             return list;
 
         //castle
-        //TODO: castle through check
         if (this.kingCastleRights || this.queenCastleRights) {
             //castle king
             //ensure adjacent are empty
