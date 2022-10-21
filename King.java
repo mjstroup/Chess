@@ -1,7 +1,7 @@
 import java.util.*;
 public class King extends Piece {
-    public boolean queenCastleRights = true;
-    public boolean kingCastleRights = true;
+    public boolean queenCastleRights = false;
+    public boolean kingCastleRights = false;
     public King (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
         this.clocation = clocation;

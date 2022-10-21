@@ -4,6 +4,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 import java.io.*;
+
 import javax.sound.sampled.*;
 
 public class Board extends JFrame  implements MouseListener, MouseMotionListener{
@@ -17,6 +18,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     public static boolean whiteTurn = true;
     public static Piece[][] pieces;
     private Piece currentPiece;
+    private Pawn passantPiece;
     private ArrayList<Piece> currentMoves;
     private JLayeredPane layeredPane;
     private JPanel chessBoard;
@@ -28,8 +30,9 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private JLabel piece;
     private boolean moveIsCapture = false;
 
-    public Board(Piece[][] pieceList) {
-        pieces = pieceList;
+    public Board(String FENString) {
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        pieces = fenStringToPieces(FENString);
         Dimension size = new Dimension(800,800);
         layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
@@ -233,6 +236,32 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (!(destination instanceof EmptySquare))
             moveIsCapture = true;
         if (movingPiece.equals(destination)) return;
+        //en passant move
+        if (movingPiece instanceof Pawn && destination instanceof EmptySquare && movingPiece.getC() != destination.getC()) {
+            //mark move as capture because movePiece() will not do it for us
+            moveIsCapture = true;
+            //pawn movement
+            pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
+            pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
+            movingPiece.setLocation(destination.getR(), destination.getC());
+            //remove EP pawn label
+            pieceToComponent(pieces[passantPiece.getR()][passantPiece.getC()]).getParent().remove(0);
+            //set EP piece to empty square
+            Board.pieces[passantPiece.getR()][passantPiece.getC()] = new EmptySquare(passantPiece.getR(), passantPiece.getC());
+            passantPiece.enPassant = false;
+            passantPiece = null;
+            return;
+        }
+        //reset passant
+        if (passantPiece != null) {
+            passantPiece.enPassant = false;
+            passantPiece = null;
+        }
+        //double pawn push passant flag
+        if (movingPiece instanceof Pawn && Math.abs(movingPiece.getR() - destination.getR()) == 2) {
+            ((Pawn)movingPiece).enPassant = true;
+            passantPiece = (Pawn)movingPiece;
+        }
         //remove castle rights
         if (movingPiece instanceof King) {
             ((King)movingPiece).removeKingCastleRights();
@@ -301,7 +330,11 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         //pawn promote
         if (movingPiece instanceof Pawn && (destination.getR() == 0 || destination.getR() == 7)) {
             //TODO: under promotion
-            pieces[destination.getR()][destination.getC()] = new Queen(destination.getR() == 0, 0, destination.getC());
+            if (destination.getR() == 0) {
+                pieces[destination.getR()][destination.getC()] = new Queen(true, 0, destination.getC());
+            } else {
+                pieces[destination.getR()][destination.getC()] = new Queen(false, 7, destination.getC());
+            }
             currentPiece = pieces[destination.getR()][destination.getC()];
             Image image = (new ImageIcon(currentPiece.fileName)).getImage();
             image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
@@ -383,12 +416,114 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }).start();
     }
 
-    public static void main(String[] args) {
-        Board b = new Board(Piece.newBoard);
-        b.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        b.pack();
-        b.setResizable(false);
-        b.setLocationRelativeTo(null);
-        b.setVisible(true);
+    public Piece[][] fenStringToPieces(String FENString) {
+        //TODO: implement en passant and half/full moves
+        Piece[][] pieces = new Piece[8][8];
+        int rcounter = 0;
+        int ccounter = 0;
+        int wKingr = -1;
+        int wKingc = -1;
+        int bKingr = -1;
+        int bKingc = -1;
+        
+        //fill out table
+        for (int i = 0; i < FENString.indexOf(" "); i++) {
+            char c = FENString.charAt(i);
+            if (c == '/') continue;
+            switch(c) {
+                case 'R' -> {
+                    pieces[rcounter][ccounter] = new Rook(true, rcounter, ccounter);
+                }
+                case 'N' -> {
+                    pieces[rcounter][ccounter] = new Knight(true, rcounter, ccounter);
+                }
+                case 'B' -> {
+                    pieces[rcounter][ccounter] = new Bishop(true, rcounter, ccounter);
+                }
+                case 'Q' -> {
+                    pieces[rcounter][ccounter] = new Queen(true, rcounter, ccounter);
+                }
+                case 'K' -> {
+                    pieces[rcounter][ccounter] = new King(true, rcounter, ccounter);
+                    wKingr = rcounter;
+                    wKingc = ccounter;
+                }
+                case 'P' -> {
+                    pieces[rcounter][ccounter] = new Pawn(true, rcounter, ccounter);
+                }
+                case 'r' -> {
+                    pieces[rcounter][ccounter] = new Rook(false, rcounter, ccounter);
+                }
+                case 'n' -> {
+                    pieces[rcounter][ccounter] = new Knight(false, rcounter, ccounter);
+                }
+                case 'b' -> {
+                    pieces[rcounter][ccounter] = new Bishop(false, rcounter, ccounter);
+                }
+                case 'q' -> {
+                    pieces[rcounter][ccounter] = new Queen(false, rcounter, ccounter);
+                }
+                case 'k' -> {
+                    pieces[rcounter][ccounter] = new King(false, rcounter, ccounter);
+                    bKingr = rcounter;
+                    bKingc = ccounter;
+                }
+                case 'p' -> {
+                    pieces[rcounter][ccounter] = new Pawn(false, rcounter, ccounter);
+                }
+                //empty squares
+                default -> {
+                    int num = c-48;
+                    for (int j = 0; j < num; j++) {
+                        pieces[rcounter][ccounter] = new EmptySquare(rcounter, ccounter);
+                        if (ccounter == 7) {
+                            rcounter++;
+                            ccounter = 0;
+                        } else {
+                            ccounter++;
+                        }
+                    }
+                    //just decrement once so we can increment after switch
+                    if (ccounter == 0) {
+                        rcounter--;
+                        ccounter = 7;
+                    } else {
+                        ccounter--;
+                    }
+                }
+            }
+            //increment and wrap if needed
+            if (ccounter == 7) {
+                rcounter++;
+                ccounter = 0;
+            } else {
+                ccounter++;
+            }
+        }
+        FENString = FENString.substring(FENString.indexOf(" ") + 1);
+        if (FENString.charAt(0) == 'w') {
+            Board.whiteTurn = true;
+        } else {
+            Board.whiteTurn = false;
+        }
+        FENString = FENString.substring(2);
+        for (int i = 0; i < FENString.indexOf(" "); i++) {
+            char c = FENString.charAt(i);
+            switch (c) {
+                case 'K' -> {
+                    ((King)(pieces[wKingr][wKingc])).kingCastleRights = true;
+                }
+                case 'Q' -> {
+                    ((King)(pieces[wKingr][wKingc])).queenCastleRights = true;
+                }
+                case 'k' -> {
+                    ((King)(pieces[bKingr][bKingc])).kingCastleRights = true;
+                }
+                case 'q' -> {
+                    ((King)(pieces[bKingr][bKingc])).queenCastleRights = true;
+                }
+            }
+        }
+        return pieces;
     }
 }

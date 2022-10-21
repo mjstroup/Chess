@@ -1,5 +1,6 @@
 import java.util.*;
 public class Pawn extends Piece {
+    public boolean enPassant = false;
     public Pawn (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
         this.clocation = clocation;
@@ -13,6 +14,22 @@ public class Pawn extends Piece {
         if (Board.whiteTurn != this.white)
             return list;
         //TODO: en passant
+        //en passant left white
+        if (this.white && this.clocation != 0 && Board.pieces[rlocation][clocation-1] instanceof Pawn && !Board.pieces[rlocation][clocation-1].white && ((Pawn)Board.pieces[rlocation][clocation-1]).enPassant) {
+            list.add(Board.pieces[rlocation-1][clocation-1]);
+        }
+        //en passant right white
+        if (this.white && this.clocation != 7 && Board.pieces[rlocation][clocation+1] instanceof Pawn && !Board.pieces[rlocation][clocation+1].white && ((Pawn)Board.pieces[rlocation][clocation+1]).enPassant) {
+            list.add(Board.pieces[rlocation-1][clocation+1]);
+        }
+        //en passant left black
+        if (!this.white && this.clocation != 0 && Board.pieces[rlocation][clocation-1] instanceof Pawn && Board.pieces[rlocation][clocation-1].white && ((Pawn)Board.pieces[rlocation][clocation-1]).enPassant) {
+            list.add(Board.pieces[rlocation+1][clocation-1]);
+        }
+        //en passant right black
+        if (!this.white && this.clocation != 7 && Board.pieces[rlocation][clocation+1] instanceof Pawn && Board.pieces[rlocation][clocation+1].white && ((Pawn)Board.pieces[rlocation][clocation+1]).enPassant) {
+            list.add(Board.pieces[rlocation+1][clocation+1]);
+        }
         if (this.white) {
             //captures
             Piece topLeft = null;
