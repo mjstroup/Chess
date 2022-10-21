@@ -13,7 +13,6 @@ public class Pawn extends Piece {
         ArrayList<Piece> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
-        //TODO: en passant
         //en passant left white
         if (this.white && this.clocation != 0 && Board.pieces[rlocation][clocation-1] instanceof Pawn && !Board.pieces[rlocation][clocation-1].white && ((Pawn)Board.pieces[rlocation][clocation-1]).enPassant) {
             list.add(Board.pieces[rlocation-1][clocation-1]);

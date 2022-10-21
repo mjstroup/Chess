@@ -25,6 +25,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private JPanel originalPanel;
     private JPanel currentPanel;
     private Color currentPanelColor;
+    private Color originalPanelColor;
     private JPanel previousMoveOriginalPanel;
     private JPanel previousMoveCurrentPanel;
     private JLabel piece;
@@ -77,6 +78,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         layeredPane.add(piece, JLayeredPane.DRAG_LAYER);
         currentPanel = (JPanel)chessBoard.findComponentAt(me.getX(), me.getY());
         currentPanelColor = currentPanel.getBackground();
+        originalPanelColor = currentPanel.getBackground();
         originalPanel = (JPanel)chessBoard.findComponentAt(me.getX(), me.getY());
         if (isWhitePanel(originalPanel))
             originalPanel.setBackground(lightCover);
@@ -153,13 +155,11 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         piece.setVisible(true);
         movePiece(movingPiece, destination);
 
-        System.out.println(movingPiece.abbreviation + pieceToCoords(destination));
+        String asdf = pieceToCoords(destination);
+        System.out.println(movingPiece.abbreviation + asdf);
 
         currentPanel.setBackground(currentPanelColor);
-        if (isWhitePanel(originalPanel))
-            originalPanel.setBackground(light);
-        else
-            originalPanel.setBackground(dark);
+        originalPanel.setBackground(originalPanelColor);
         //did the move really happen..
         if (!returned) {
             //play sound
@@ -352,33 +352,17 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         int x = p.getR();
         int y = p.getC();
         String s = "";
-        switch (y) {
-            case 0: s+="A"; break;
-            case 1: s+="B"; break;
-            case 2: s+="C"; break;
-            case 3: s+="D"; break;
-            case 4: s+="E"; break;
-            case 5: s+="F"; break;
-            case 6: s+="G"; break;
-            case 7: s+="H"; break;
-        }
+        s += (char)(y+97);
         s += (8-x) + "";
         return s;
     }
-    public String xyToCoords(int x, int y) {
-        String s = "";
-        switch (y) {
-            case 0: s+="A"; break;
-            case 1: s+="B"; break;
-            case 2: s+="C"; break;
-            case 3: s+="D"; break;
-            case 4: s+="E"; break;
-            case 5: s+="F"; break;
-            case 6: s+="G"; break;
-            case 7: s+="H"; break;
-        }
-        s += (8-x) + "";
-        return s;
+    
+    public Piece coordsToPiece(String s, Piece[][] pieces) {
+        char letter = s.charAt(0);
+        char number = s.charAt(1);
+        int x = (8-(number-48));
+        int y = letter-97;
+        return pieces[x][y];
     }
 
     public void mouseClicked(MouseEvent me) {}
@@ -417,7 +401,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public Piece[][] fenStringToPieces(String FENString) {
-        //TODO: implement en passant and half/full moves
+        //TODO: implement half/full moves
         Piece[][] pieces = new Piece[8][8];
         int rcounter = 0;
         int ccounter = 0;
@@ -500,12 +484,14 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 ccounter++;
             }
         }
+        //whose move is it?
         FENString = FENString.substring(FENString.indexOf(" ") + 1);
         if (FENString.charAt(0) == 'w') {
             Board.whiteTurn = true;
         } else {
             Board.whiteTurn = false;
         }
+        //castling rights
         FENString = FENString.substring(2);
         for (int i = 0; i < FENString.indexOf(" "); i++) {
             char c = FENString.charAt(i);
@@ -523,6 +509,17 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                     ((King)(pieces[bKingr][bKingc])).queenCastleRights = true;
                 }
             }
+        }
+        FENString = FENString.substring(FENString.indexOf(" ")+1);
+        //now EP
+        String EPSquare = FENString.substring(0,2);
+        Piece epPiece = coordsToPiece(EPSquare, pieces);
+        if (epPiece.getR() != 7 && pieces[epPiece.getR()+1][epPiece.getC()] instanceof Pawn) {
+            ((Pawn)pieces[epPiece.getR()+1][epPiece.getC()]).enPassant = true;
+            passantPiece = ((Pawn)pieces[epPiece.getR()+1][epPiece.getC()]);
+        } else if (epPiece.getR() != 0 && pieces[epPiece.getR()-1][epPiece.getC()] instanceof Pawn) {
+            ((Pawn)pieces[epPiece.getR()-1][epPiece.getC()]).enPassant = true;
+            passantPiece = ((Pawn)pieces[epPiece.getR()-1][epPiece.getC()]);
         }
         return pieces;
     }
