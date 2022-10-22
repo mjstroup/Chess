@@ -17,6 +17,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public static boolean whiteTurn = true;
     public static Piece[][] pieces;
+    private static int halfMoveCount = 0;
     private Piece currentPiece;
     private Pawn passantPiece;
     private ArrayList<Piece> currentMoves;
@@ -155,73 +156,11 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         piece.setVisible(true);
         movePiece(movingPiece, destination);
 
-        String asdf = pieceToCoords(destination);
-        System.out.println(movingPiece.abbreviation + asdf);
-
         currentPanel.setBackground(currentPanelColor);
         originalPanel.setBackground(originalPanelColor);
         //did the move really happen..
         if (!returned) {
-            //play sound
-            if (moveIsCapture)
-                playSound("./Sounds/Capture.wav");
-            else
-                playSound("./Sounds/Move.wav");
-            
-            //update the colors for previous move
-            originalPanel.setBackground(previousMoveOriginalColor);
-            currentPanel.setBackground(previousMoveDestColor);
-            //set previous (previous) move panels to original color unless its equal to one of the above
-            if (previousMoveOriginalPanel != null && previousMoveOriginalPanel != currentPanel && previousMoveOriginalPanel != originalPanel) {
-                if (((previousMoveOriginalPanel.getX()+previousMoveOriginalPanel.getY())/99)%2 == 0) {
-                    previousMoveOriginalPanel.setBackground(light);
-                } else {
-                    previousMoveOriginalPanel.setBackground(dark);
-                }
-            }
-            if (previousMoveCurrentPanel != null && previousMoveCurrentPanel != currentPanel && previousMoveCurrentPanel != originalPanel) {
-                if (((previousMoveCurrentPanel.getX()+previousMoveCurrentPanel.getY())/99)%2 == 0) {
-                    previousMoveCurrentPanel.setBackground(light);
-                } else {
-                    previousMoveCurrentPanel.setBackground(dark);
-                }
-            }
-            //re-mark these variables
-            previousMoveOriginalPanel = originalPanel;
-            previousMoveCurrentPanel = currentPanel;
-
-            
-            whiteTurn = !whiteTurn;
-            //TODO: insufficient material check
-            //TODO: 50 move rule (including pawn pushes and halfmoves)
-            //TODO: 3 move check
-            //checkmate check
-            boolean checkmate = true;
-            boolean stalemate = false;
-            for (int i = 0; i < pieces.length; i++) {
-                for (int j = 0; j < pieces[0].length; j++) {
-                    Piece p = pieces[i][j];
-                    if (p.white != movingPiece.white && p.getPossibleMoves().size() != 0) {
-                        checkmate = false;
-                        stalemate = false;
-                    }
-                    if (p.white != movingPiece.white && p instanceof King)
-                        if (p.white && !p.isAttackedByBlack())
-                            stalemate = true;
-                        else if (!p.isAttackedByWhite())
-                            stalemate = true;
-                }
-            }
-            if (checkmate && stalemate) {
-                //stalemate
-                dispose();
-                System.out.println("Stalemate.");
-            } else if (checkmate) {
-                //checkmate
-                dispose();
-                String winner = whiteTurn ? "black" : "white";
-                System.out.println("Checkmate for " + winner + ".");
-            }
+            postMove(movingPiece);
         }
         piece = null;
         currentPiece = null;
@@ -348,6 +287,124 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
         movingPiece.setLocation(destination.getR(), destination.getC());
     }
+
+    public void postMove(Piece movingPiece) {
+        //play sound
+        if (moveIsCapture)
+            playSound("./Sounds/Capture.wav");
+        else
+            playSound("./Sounds/Move.wav");
+        //update half move count
+        if (moveIsCapture || movingPiece instanceof Pawn)
+            halfMoveCount = 0;
+        else
+            halfMoveCount++;
+        
+        //update the colors for previous move
+        originalPanel.setBackground(previousMoveOriginalColor);
+        currentPanel.setBackground(previousMoveDestColor);
+        //set previous (previous) move panels to original color unless its equal to one of the above
+        if (previousMoveOriginalPanel != null && previousMoveOriginalPanel != currentPanel && previousMoveOriginalPanel != originalPanel) {
+            if (((previousMoveOriginalPanel.getX()+previousMoveOriginalPanel.getY())/99)%2 == 0) {
+                previousMoveOriginalPanel.setBackground(light);
+            } else {
+                previousMoveOriginalPanel.setBackground(dark);
+            }
+        }
+        if (previousMoveCurrentPanel != null && previousMoveCurrentPanel != currentPanel && previousMoveCurrentPanel != originalPanel) {
+            if (((previousMoveCurrentPanel.getX()+previousMoveCurrentPanel.getY())/99)%2 == 0) {
+                previousMoveCurrentPanel.setBackground(light);
+            } else {
+                previousMoveCurrentPanel.setBackground(dark);
+            }
+        }
+        //re-mark these variables
+        previousMoveOriginalPanel = originalPanel;
+        previousMoveCurrentPanel = currentPanel;
+        
+        whiteTurn = !whiteTurn;
+        //TODO: insufficient material check
+        //TODO: 3 move stalemate
+        //stalemate checks
+        //50 move rule
+        if (halfMoveCount == 100) {
+            //stalemate
+            dispose();
+            System.out.println("Stalemate.");
+        }
+        //insufficient material
+        // ArrayList<Piece> whitePieces = new ArrayList<>();
+        // ArrayList<Piece> blackPieces = new ArrayList<>();
+        // for (int i = 0; i < Board.pieces.length; i++) {
+        //     for (int j = 0; j < Board.pieces[0].length; j++) {
+        //     }
+        // }
+        //checkmate check
+        boolean checkmate = true;
+        boolean stalemate = false;
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[0].length; j++) {
+                Piece p = pieces[i][j];
+                if (p.white != movingPiece.white && p.getPossibleMoves().size() != 0) {
+                    checkmate = false;
+                    stalemate = false;
+                }
+                if (p.white != movingPiece.white && p instanceof King)
+                    if (p.white && !p.isAttackedByBlack())
+                        stalemate = true;
+                    else if (!p.isAttackedByWhite())
+                        stalemate = true;
+            }
+        }
+        if (checkmate && stalemate) {
+            //stalemate
+            dispose();
+            System.out.println("Stalemate.");
+        } else if (checkmate) {
+            //checkmate
+            dispose();
+            String winner = whiteTurn ? "black" : "white";
+            System.out.println("Checkmate for " + winner + ".");
+        }
+    }
+
+    /*
+     * assumes move is valid
+     */
+    public void remoteMove(Piece movingPiece, Piece destination) {
+        JPanel startingPanel;
+        JPanel endingPanel;
+        Component originalComponent = pieceToComponent(movingPiece); 
+        startingPanel = (JPanel)originalComponent.getParent();
+        JLabel pieceLabel = (JLabel)originalComponent;
+
+        Component destinationComponent = pieceToComponent(destination);
+        if (destinationComponent instanceof JLabel) {
+            endingPanel = (JPanel)destinationComponent.getParent();
+        } else {
+            endingPanel = (JPanel)destinationComponent;
+        }
+
+        pieceLabel.setVisible(false);
+        startingPanel.remove(0);
+        if (destinationComponent instanceof JLabel) {
+            endingPanel.remove(0);
+        }
+        endingPanel.add(pieceLabel);
+        pieceLabel.setVisible(true);
+
+        movePiece(movingPiece, destination);
+        
+        this.originalPanel = startingPanel;
+        this.currentPanel = endingPanel;
+
+        postMove(movingPiece);
+        
+        originalPanel = null;
+        currentPanel = null;
+        moveIsCapture = false;
+    }
+
     public String pieceToCoords(Piece p) {
         int x = p.getR();
         int y = p.getC();
@@ -401,7 +458,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public Piece[][] fenStringToPieces(String FENString) {
-        //TODO: implement half/full moves
         Piece[][] pieces = new Piece[8][8];
         int rcounter = 0;
         int ccounter = 0;
@@ -513,14 +569,18 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         FENString = FENString.substring(FENString.indexOf(" ")+1);
         //now EP
         String EPSquare = FENString.substring(0,2);
-        Piece epPiece = coordsToPiece(EPSquare, pieces);
-        if (epPiece.getR() != 7 && pieces[epPiece.getR()+1][epPiece.getC()] instanceof Pawn) {
-            ((Pawn)pieces[epPiece.getR()+1][epPiece.getC()]).enPassant = true;
-            passantPiece = ((Pawn)pieces[epPiece.getR()+1][epPiece.getC()]);
-        } else if (epPiece.getR() != 0 && pieces[epPiece.getR()-1][epPiece.getC()] instanceof Pawn) {
-            ((Pawn)pieces[epPiece.getR()-1][epPiece.getC()]).enPassant = true;
-            passantPiece = ((Pawn)pieces[epPiece.getR()-1][epPiece.getC()]);
+        if (!EPSquare.equals("- ")) {
+            Piece epPiece = coordsToPiece(EPSquare, pieces);
+            if (epPiece.getR() != 7 && pieces[epPiece.getR()+1][epPiece.getC()] instanceof Pawn) {
+                ((Pawn)pieces[epPiece.getR()+1][epPiece.getC()]).enPassant = true;
+                passantPiece = ((Pawn)pieces[epPiece.getR()+1][epPiece.getC()]);
+            } else if (epPiece.getR() != 0 && pieces[epPiece.getR()-1][epPiece.getC()] instanceof Pawn) {
+                ((Pawn)pieces[epPiece.getR()-1][epPiece.getC()]).enPassant = true;
+                passantPiece = ((Pawn)pieces[epPiece.getR()-1][epPiece.getC()]);
+            }
         }
+        FENString = FENString.substring(FENString.indexOf(" ")+1);
+        Board.halfMoveCount = Integer.parseInt(FENString.substring(0, FENString.indexOf(" ")));
         return pieces;
     }
 }
