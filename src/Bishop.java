@@ -80,4 +80,8 @@ public class Bishop extends Piece {
         }   
         return list;
     }
+    
+    public Bishop clonePiece() {
+        return new Bishop(this.white, this.rlocation, this.clocation);
+    }
 }

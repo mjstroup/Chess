@@ -27,4 +27,8 @@ public class Queen extends Piece {
         list.addAll(new Bishop(this.white, this.getR(), this.getC()).getAttackingMoves());
         return list;
     }
+
+    public Queen clonePiece() {
+        return new Queen(this.white, this.rlocation, this.clocation);
+    }
 }

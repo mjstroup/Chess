@@ -20,8 +20,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     public static Piece[][] pieces;
     private static Engine engine;
     private static int halfMoveCount = 0;
+    private static int fullMoveCount = 1;
     private Piece currentPiece;
-    private Pawn passantPiece;
     private ArrayList<Piece> currentMoves;
     private JLayeredPane layeredPane;
     private JPanel chessBoard;
@@ -90,8 +90,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             originalPanel.setBackground(darkCover);
         currentPiece = componentToPiece(currentPanel);
         currentMoves = currentPiece.getPossibleMoves();
-        System.out.println(currentPiece);
-        System.out.println(currentMoves);
+        // System.out.println(currentPiece);
+        // System.out.println(currentMoves);
     }
 
     public void mouseDragged(MouseEvent me) {
@@ -189,23 +189,30 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
             pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
             movingPiece.setLocation(destination.getR(), destination.getC());
+            Pawn passantPiece;
+            if (whiteTurn) {
+                passantPiece = (Pawn)pieces[destination.getR()+1][destination.getC()];
+            } else {
+                passantPiece = (Pawn)pieces[destination.getR()-1][destination.getC()];
+            }
             //remove EP pawn label
             pieceToComponent(pieces[passantPiece.getR()][passantPiece.getC()]).getParent().remove(0);
             //set EP piece to empty square
             Board.pieces[passantPiece.getR()][passantPiece.getC()] = new EmptySquare(passantPiece.getR(), passantPiece.getC());
-            passantPiece.enPassant = false;
-            passantPiece = null;
+            ((EmptySquare)destination).enPassant = false;
             return;
         }
         //reset passant
-        if (passantPiece != null) {
-            passantPiece.enPassant = false;
-            passantPiece = null;
+        if (getPassantPiece() != null) {
+            getPassantPiece().enPassant = false;
         }
         //double pawn push passant flag
         if (movingPiece instanceof Pawn && Math.abs(movingPiece.getR() - destination.getR()) == 2) {
-            ((Pawn)movingPiece).enPassant = true;
-            passantPiece = (Pawn)movingPiece;
+            if (whiteTurn) {
+                ((EmptySquare)pieces[destination.getR()+1][destination.getC()]).enPassant = true;
+            } else {
+                ((EmptySquare)pieces[destination.getR()-1][destination.getC()]).enPassant = true;
+            }
         }
         //remove castle rights
         if (movingPiece instanceof King) {
@@ -274,7 +281,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //pawn promote
         if (movingPiece instanceof Pawn && (destination.getR() == 0 || destination.getR() == 7)) {
-            //TODO: under promotion
             if (destination.getR() == 0) {
                 pieces[destination.getR()][destination.getC()] = new Queen(true, 0, destination.getC());
             } else {
@@ -284,6 +290,109 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             Image image = (new ImageIcon(currentPiece.fileName)).getImage();
             image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
             piece.setIcon(new ImageIcon(image));
+            pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
+            movingPiece.setLocation(destination.getR(), destination.getC());
+            return;
+        }
+        //now move
+        pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
+        pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
+        movingPiece.setLocation(destination.getR(), destination.getC());
+    }
+
+    public void APImovePiece(Piece movingPiece, Piece destination) {
+        if (!(destination instanceof EmptySquare))
+            moveIsCapture = true;
+        if (movingPiece.equals(destination)) return;
+        //en passant move
+        if (movingPiece instanceof Pawn && destination instanceof EmptySquare && movingPiece.getC() != destination.getC()) {
+            //mark move as capture because movePiece() will not do it for us
+            moveIsCapture = true;
+            //pawn movement
+            pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
+            pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
+            movingPiece.setLocation(destination.getR(), destination.getC());
+            Pawn passantPiece;
+            if (whiteTurn) {
+                passantPiece = (Pawn)pieces[destination.getR()+1][destination.getC()];
+            } else {
+                passantPiece = (Pawn)pieces[destination.getR()-1][destination.getC()];
+            }
+            //set EP piece to empty square
+            Board.pieces[passantPiece.getR()][passantPiece.getC()] = new EmptySquare(passantPiece.getR(), passantPiece.getC());
+            ((EmptySquare)destination).enPassant = false;
+            return;
+        }
+        //reset passant
+        if (getPassantPiece() != null) {
+            getPassantPiece().enPassant = false;
+        }
+        //double pawn push passant flag
+        if (movingPiece instanceof Pawn && Math.abs(movingPiece.getR() - destination.getR()) == 2) {
+            if (whiteTurn) {
+                ((EmptySquare)pieces[destination.getR()+1][destination.getC()]).enPassant = true;
+            } else {
+                ((EmptySquare)pieces[destination.getR()-1][destination.getC()]).enPassant = true;
+            }
+        }
+        //remove castle rights
+        if (movingPiece instanceof King) {
+            ((King)movingPiece).removeKingCastleRights();
+            ((King)movingPiece).removeQueenCastleRights();
+        }
+        if (movingPiece instanceof Rook && (movingPiece == pieces[7][0] || movingPiece == pieces[7][7]) && movingPiece.white) {
+            if (pieces[7][4] instanceof King) {
+                if (movingPiece == pieces[7][0])
+                    ((King)pieces[7][4]).removeQueenCastleRights();
+                else
+                    ((King)pieces[7][4]).removeKingCastleRights(); 
+            }
+        } else if (movingPiece instanceof Rook && (movingPiece == pieces[0][0] || movingPiece == pieces[0][7]) && !movingPiece.white) {
+            if (pieces[0][4] instanceof King) {
+                if (movingPiece == pieces[0][0])
+                    ((King)pieces[0][4]).removeQueenCastleRights();
+                else
+                    ((King)pieces[0][4]).removeKingCastleRights(); 
+            }
+        }
+        //castle
+        if (movingPiece instanceof King && Math.abs(destination.getC() - movingPiece.getC()) > 1) {
+            int row = movingPiece.white ? 7 : 0;
+            if (destination.getC() == 6) {
+                //king side
+                //rook
+                pieces[row][5] = pieces[row][7];
+                pieces[row][5].setLocation(row, 5);
+                //king
+                pieces[row][6] = pieces[row][4];
+                pieces[row][6].setLocation(row, 6);
+                //empty king and rook orig squares
+                pieces[row][7] = new EmptySquare(row, 7);
+                pieces[row][4] = new EmptySquare(row, 4);
+                return;
+            } else if (destination.getC() == 2) {
+                //queen side
+                //rook
+                pieces[row][3] = pieces[row][0];
+                pieces[row][3].setLocation(row, 3);
+                //king
+                pieces[row][2] = pieces[row][4];
+                pieces[row][2].setLocation(row, 2);
+                //empty king and rook orig squares
+                pieces[row][0] = new EmptySquare(row, 0);
+                pieces[row][4] = new EmptySquare(row, 4);
+                return;
+            }
+        }
+        //pawn promote
+        if (movingPiece instanceof Pawn && (destination.getR() == 0 || destination.getR() == 7)) {
+            //TODO: under promotion
+            if (destination.getR() == 0) {
+                pieces[destination.getR()][destination.getC()] = new Queen(true, 0, destination.getC());
+            } else {
+                pieces[destination.getR()][destination.getC()] = new Queen(false, 7, destination.getC());
+            }
+            currentPiece = pieces[destination.getR()][destination.getC()];
             pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
             movingPiece.setLocation(destination.getR(), destination.getC());
             return;
@@ -329,7 +438,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         previousMoveCurrentPanel = currentPanel;
         
         whiteTurn = !whiteTurn;
-        //TODO: insufficient material check
         //TODO: 3 move stalemate
         //stalemate checks
         //50 move rule
@@ -339,13 +447,73 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             System.out.println("Stalemate.");
             System.exit(0);
         }
-        //insufficient material
-        // ArrayList<Piece> whitePieces = new ArrayList<>();
-        // ArrayList<Piece> blackPieces = new ArrayList<>();
-        // for (int i = 0; i < Board.pieces.length; i++) {
-        //     for (int j = 0; j < Board.pieces[0].length; j++) {
-        //     }
-        // }
+        //update full move
+        if (whiteTurn) {
+            fullMoveCount++;
+        }
+        // insufficient material
+        ArrayList<Piece> whitePieces = new ArrayList<>();
+        ArrayList<Piece> blackPieces = new ArrayList<>();
+        for (int i = 0; i < Board.pieces.length; i++) {
+            for (int j = 0; j < Board.pieces[0].length; j++) {
+                Piece p = pieces[i][j];
+                if (p instanceof EmptySquare) continue;
+                if (p.white) {
+                    whitePieces.add(p);
+                } else {
+                    blackPieces.add(p);
+                }
+            }
+        }
+        //2 kings
+        if (whitePieces.size() == 1 && blackPieces.size() == 1) {
+            //stalemate
+            dispose();
+            System.out.println("Stalemate.");
+            System.exit(0);
+        }
+        //2 kings + bishop or knight
+        if ((whitePieces.size() == 1 || blackPieces.size() == 1) && (whitePieces.size() == 2 || blackPieces.size() == 2)) {
+            if (blackPieces.size() == 2) {
+                if (blackPieces.get(0) instanceof Bishop || blackPieces.get(1) instanceof Bishop) {
+                    //stalemate
+                    dispose();
+                    System.out.println("Stalemate.");
+                    System.exit(0);
+                }
+                if (blackPieces.get(0) instanceof Knight || blackPieces.get(1) instanceof Knight) {
+                    //stalemate
+                    dispose();
+                    System.out.println("Stalemate.");
+                    System.exit(0);
+                }
+            }
+            if (whitePieces.size() == 2) {
+                if (whitePieces.get(0) instanceof Bishop || whitePieces.get(1) instanceof Bishop) {
+                    //stalemate
+                    dispose();
+                    System.out.println("Stalemate.");
+                    System.exit(0);
+                }
+                if (whitePieces.get(0) instanceof Knight || whitePieces.get(1) instanceof Knight) {
+                    //stalemate
+                    dispose();
+                    System.out.println("Stalemate.");
+                    System.exit(0);
+                }
+            }
+        }
+        //2 kings + 2 bishop same color
+        if (whitePieces.size() == 2 && blackPieces.size() == 2) {
+            Bishop white = whitePieces.get(0) instanceof King ? (Bishop)whitePieces.get(1) : (Bishop)whitePieces.get(0);
+            Bishop black = blackPieces.get(0) instanceof King ? (Bishop)blackPieces.get(1) : (Bishop)blackPieces.get(0);
+            if ((white.rlocation + white.clocation) % 2 == (black.rlocation + black.clocation) % 2) {
+                //stalemate
+                dispose();
+                System.out.println("Stalemate.");
+                System.exit(0);
+            }
+        }
         //checkmate check
         boolean checkmate = true;
         boolean stalemate = false;
@@ -416,7 +584,19 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         moveIsCapture = false;
     }
 
-    public String pieceToCoords(Piece p) {
+    public void APIMove(Move move) {
+        Piece movingPiece = move.startingPiece;
+        Piece destination = move.endingPiece;
+        APImovePiece(movingPiece, destination);
+        whiteTurn = !whiteTurn;
+    }
+
+    public void APIUnMove(Piece[][] copyPieces) {
+        Board.pieces = copyPieces;
+        whiteTurn = !whiteTurn;
+    }
+
+    public static String pieceToCoords(Piece p) {
         int x = p.getR();
         int y = p.getC();
         String s = "";
@@ -581,17 +761,13 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         //now EP
         String EPSquare = FENString.substring(0,2);
         if (!EPSquare.equals("- ")) {
-            Piece epPiece = coordsToPiece(EPSquare, pieces);
-            if (epPiece.getR() != 7 && pieces[epPiece.getR()+1][epPiece.getC()] instanceof Pawn) {
-                ((Pawn)pieces[epPiece.getR()+1][epPiece.getC()]).enPassant = true;
-                passantPiece = ((Pawn)pieces[epPiece.getR()+1][epPiece.getC()]);
-            } else if (epPiece.getR() != 0 && pieces[epPiece.getR()-1][epPiece.getC()] instanceof Pawn) {
-                ((Pawn)pieces[epPiece.getR()-1][epPiece.getC()]).enPassant = true;
-                passantPiece = ((Pawn)pieces[epPiece.getR()-1][epPiece.getC()]);
-            }
+            EmptySquare epPiece = (EmptySquare)coordsToPiece(EPSquare, pieces);
+            epPiece.enPassant = true;
         }
         FENString = FENString.substring(FENString.indexOf(" ")+1);
         Board.halfMoveCount = Integer.parseInt(FENString.substring(0, FENString.indexOf(" ")));
+        FENString = FENString.substring(FENString.indexOf(" ")+1);
+        Board.fullMoveCount = Integer.parseInt(FENString);
         return pieces;
     }
 
@@ -601,6 +777,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public ArrayList<Move> getAllBlackMoves() {
         return getAllMoves(false);
+    }
+
+    public ArrayList<Move> getAllTurnMoves() {
+        return getAllMoves(whiteTurn);
     }
 
     public ArrayList<Move> getAllMoves(boolean white) {
@@ -617,5 +797,111 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             }
         }
         return totalMoves;
+    }
+
+    public EmptySquare getPassantPiece() {
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[0].length; j++) {
+                Piece p = pieces[i][j];
+                if (p instanceof EmptySquare && ((EmptySquare)p).enPassant) {
+                    return (EmptySquare)p;
+                }
+            }
+        }
+        return null;
+    }
+
+    public String getCastlingRights() {
+        String white = "";
+        String black = "";
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[0].length; j++) {
+                if (!(pieces[i][j] instanceof King)) continue;
+                King p = (King)pieces[i][j];
+                if (p instanceof King && p.white) {
+                    if (p.kingCastleRights)  {
+                        white += "K";
+                    }
+                    if (p.queenCastleRights) {
+                        white += "Q";
+                    }
+                }
+                if (p instanceof King && !p.white) {
+                    if (p.kingCastleRights)  {
+                        white += "k";
+                    }
+                    if (p.queenCastleRights) {
+                        white += "q";
+                    }
+                }
+            }
+        }
+        return white + black;
+    }
+
+    public String getFEN() {
+        String fen = "";
+        for (int i = 0; i < Board.pieces.length; i++) {
+            for (int j = 0; j < Board.pieces[0].length; j++) {
+                char c = Board.pieces[i][j].abbreviation;
+                if (Board.pieces[i][j] instanceof EmptySquare) {
+                    if (fen.length() == 0) {
+                        fen += 1;
+                        continue;
+                    }
+                    char previous = fen.charAt(fen.length()-1);
+                    if (previous >= 49 && previous <= 56) {
+                        //its a num
+                        fen = fen.substring(0, fen.length()-1);
+                        fen += (char)(previous+1);
+                        continue;
+                    } else {
+                        fen += 1;
+                        continue;
+                    }
+                }
+                if (!Board.pieces[i][j].white) {
+                    c += 32;
+                }
+                fen += c;
+            }
+            fen += '/';
+        }
+        //remove extra /
+        fen = fen.substring(0, fen.length()-1);
+
+        if (whiteTurn) {
+            fen += " w ";
+        } else {
+            fen += " b ";
+        }
+
+        if (getCastlingRights().length() != 0) {
+            fen += getCastlingRights() + " ";
+        } else {
+            fen += "- ";
+        }
+        
+        EmptySquare e = getPassantPiece();
+        if (e == null) {
+            fen += "- ";
+        } else {
+            fen += pieceToCoords(e) + " ";
+        }
+        fen += halfMoveCount + " ";
+        fen += fullMoveCount;
+
+        return fen;
+    }
+
+    public String toString() {
+        String s = "";
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[0].length; j++) {
+                s += String.format("%c(%d,%d) ", pieces[i][j].abbreviation, pieces[i][j].rlocation, pieces[i][j].clocation);
+            }
+            s += "\n";
+        }
+        return s;
     }
 }

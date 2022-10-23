@@ -6,8 +6,10 @@ public class Piece {
     public boolean white;
     public int rlocation;
     public int clocation;
+    public char promotion;
     public ArrayList<Piece> getPossibleMoves(){return null;}
     public ArrayList<Piece> getAttackingMoves(){return null;}
+    public Piece clonePiece(){return null;}
     public static final String defaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public void setLocation(int x, int y) {
         this.rlocation = x;

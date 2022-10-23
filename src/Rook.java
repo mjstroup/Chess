@@ -80,4 +80,8 @@ public class Rook extends Piece {
         }
         return list;
     }
+
+    public Rook clonePiece() {
+        return new Rook(this.white, this.rlocation, this.clocation);
+    }
 }

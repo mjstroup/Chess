@@ -7,6 +7,6 @@ public class Move {
         this.endingPiece = endingPiece;
     }
     public String toString() {
-        return startingPiece + "->" + endingPiece;
+        return Board.pieceToCoords(startingPiece) + Board.pieceToCoords(endingPiece);
     }
 }

@@ -82,4 +82,8 @@ public class King extends Piece {
         }
         return list;
     }
+    
+    public King clonePiece() {
+        return new King(this.white, this.rlocation, this.clocation);
+    }
 }

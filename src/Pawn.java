@@ -1,7 +1,6 @@
 package src;
 import java.util.*;
 public class Pawn extends Piece {
-    public boolean enPassant = false;
     public Pawn (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
         this.clocation = clocation;
@@ -14,20 +13,21 @@ public class Pawn extends Piece {
         ArrayList<Piece> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
+        //promotion
         //en passant left white
-        if (this.white && this.clocation != 0 && Board.pieces[rlocation][clocation-1] instanceof Pawn && !Board.pieces[rlocation][clocation-1].white && ((Pawn)Board.pieces[rlocation][clocation-1]).enPassant) {
+        if (this.white && this.clocation != 0 && Board.pieces[rlocation-1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation-1]).enPassant) {
             list.add(Board.pieces[rlocation-1][clocation-1]);
         }
         //en passant right white
-        if (this.white && this.clocation != 7 && Board.pieces[rlocation][clocation+1] instanceof Pawn && !Board.pieces[rlocation][clocation+1].white && ((Pawn)Board.pieces[rlocation][clocation+1]).enPassant) {
+        if (this.white && this.clocation != 7 && Board.pieces[rlocation-1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation+1]).enPassant) {
             list.add(Board.pieces[rlocation-1][clocation+1]);
         }
         //en passant left black
-        if (!this.white && this.clocation != 0 && Board.pieces[rlocation][clocation-1] instanceof Pawn && Board.pieces[rlocation][clocation-1].white && ((Pawn)Board.pieces[rlocation][clocation-1]).enPassant) {
+        if (!this.white && this.clocation != 0 && Board.pieces[rlocation+1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation-1]).enPassant) {
             list.add(Board.pieces[rlocation+1][clocation-1]);
         }
         //en passant right black
-        if (!this.white && this.clocation != 7 && Board.pieces[rlocation][clocation+1] instanceof Pawn && Board.pieces[rlocation][clocation+1].white && ((Pawn)Board.pieces[rlocation][clocation+1]).enPassant) {
+        if (!this.white && this.clocation != 7 && Board.pieces[rlocation+1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation+1]).enPassant) {
             list.add(Board.pieces[rlocation+1][clocation+1]);
         }
         if (this.white) {
@@ -81,5 +81,9 @@ public class Pawn extends Piece {
             list.add(Board.pieces[rlocation + offset][clocation+1]);
         }
         return list;
+    }
+
+    public Pawn clonePiece() {
+        return new Pawn(this.white, this.rlocation, this.clocation);
     }
 }

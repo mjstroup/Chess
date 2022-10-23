@@ -57,4 +57,8 @@ public class Knight extends Piece {
             list.add(Board.pieces[r][c]);
         return list;
     }
+
+    public Knight clonePiece() {
+        return new Knight(this.white, this.rlocation, this.clocation);
+    }
 }
