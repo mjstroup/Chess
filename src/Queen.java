@@ -9,22 +9,26 @@ public class Queen extends Piece {
         fileName = this.white ? "./Images/wQ.png" : "./Images/bQ.png";
     }
     @Override
-    public ArrayList<Piece> getPossibleMoves() {
-        ArrayList<Piece> list = new ArrayList<>();
+    public ArrayList<Move> getPossibleMoves() {
+        ArrayList<Move> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
         list.addAll(this.getAttackingMoves());
-        list.removeIf(p -> (!(p instanceof EmptySquare) && p.white == this.white));
+        list.removeIf(p -> (!(p.endingPiece instanceof EmptySquare) && p.endingPiece.white == this.white));
 
         //check test
         checkTest(list);
         return list;
     }
     @Override
-    public ArrayList<Piece> getAttackingMoves() {
-        ArrayList<Piece> list = new ArrayList<>();
-        list.addAll(new Rook(this.white, this.getR(), this.getC()).getAttackingMoves());
-        list.addAll(new Bishop(this.white, this.getR(), this.getC()).getAttackingMoves());
+    public ArrayList<Move> getAttackingMoves() {
+        ArrayList<Move> list = new ArrayList<>();
+        ArrayList<Move> tempList = new Rook(this.white, this.getR(), this.getC()).getAttackingMoves();
+        tempList.addAll(new Bishop(this.white, this.getR(), this.getC()).getAttackingMoves());
+        for (Move m : tempList) {
+            m.startingPiece = this;
+        }
+        list.addAll(tempList);
         return list;
     }
 

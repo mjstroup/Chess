@@ -7,8 +7,8 @@ public class Piece {
     public int rlocation;
     public int clocation;
     public char promotion;
-    public ArrayList<Piece> getPossibleMoves(){return null;}
-    public ArrayList<Piece> getAttackingMoves(){return null;}
+    public ArrayList<Move> getPossibleMoves(){return null;}
+    public ArrayList<Move> getAttackingMoves(){return null;}
     public Piece clonePiece(){return null;}
     public static final String defaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public void setLocation(int x, int y) {
@@ -24,8 +24,11 @@ public class Piece {
     public boolean isAttackedByWhite() {
         for (int i = 0; i < Board.pieces.length; i++) {
             for (int j = 0; j < Board.pieces[0].length; j++) {
-                if (Board.pieces[i][j].white && Board.pieces[i][j].getAttackingMoves().contains(this)) {
-                    return true;
+                if (!Board.pieces[i][j].white) continue;
+                for (Move m : Board.pieces[i][j].getAttackingMoves()) {
+                    if (m.endingPiece == this) {
+                        return true;
+                    }
                 }
             }
         }
@@ -34,14 +37,21 @@ public class Piece {
     public boolean isAttackedByBlack() {
         for (int i = 0; i < Board.pieces.length; i++) {
             for (int j = 0; j < Board.pieces[0].length; j++) {
-                if (!Board.pieces[i][j].white && Board.pieces[i][j].getAttackingMoves().contains(this)) {
-                    return true;
+                if (Board.pieces[i][j].white) continue;
+                for (Move m : Board.pieces[i][j].getAttackingMoves()) {
+                    if (m.endingPiece == this) {
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
-    public void checkTest(ArrayList<Piece> list) {
+    public void checkTest(ArrayList<Move> moveList) {
+        ArrayList<Piece> list = new ArrayList<>();
+        for (Move m : moveList) {
+            list.add(m.endingPiece);
+        }
         Iterator<Piece> it = list.iterator();
         while (it.hasNext()) {
             Piece p = it.next();
@@ -73,6 +83,13 @@ public class Piece {
             this.setLocation(tempR, tempC);
             Board.pieces[this.getR()][this.getC()] = tempMoving;
             Board.pieces[p.getR()][p.getC()] = tempDestination;
+        }
+        Iterator<Move> moveListIterator = moveList.iterator();
+        while (moveListIterator.hasNext()) {
+            Move m = moveListIterator.next();
+            if (!list.contains(m.endingPiece)) {
+                moveListIterator.remove();
+            }
         }
     }
 }

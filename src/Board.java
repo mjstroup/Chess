@@ -22,7 +22,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private static int halfMoveCount = 0;
     private static int fullMoveCount = 1;
     private Piece currentPiece;
-    private ArrayList<Piece> currentMoves;
+    private ArrayList<Move> currentMoves;
     private JLayeredPane layeredPane;
     private JPanel chessBoard;
     private JPanel originalPanel;
@@ -90,8 +90,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             originalPanel.setBackground(darkCover);
         currentPiece = componentToPiece(currentPanel);
         currentMoves = currentPiece.getPossibleMoves();
-        // System.out.println(currentPiece);
-        // System.out.println(currentMoves);
+        System.out.println(currentPiece);
+        System.out.println(currentMoves);
     }
 
     public void mouseDragged(MouseEvent me) {
@@ -121,8 +121,14 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             currentPanel = (JPanel)c;
         }
         //light up current panel
+        boolean light = false;
+        for (Move m : currentMoves) {
+            if (m.endingPiece == currentPanelPiece) {
+                light = true;
+            }
+        }
         if (currentPanel instanceof JPanel)
-            if (currentPanelPiece != null && currentMoves.contains(currentPanelPiece))
+            if (currentPanelPiece != null && light)
                 if (isWhitePanel(currentPanel)) 
                     currentPanel.setBackground(lightCover);
                 else 
@@ -140,7 +146,13 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             destination = componentToPiece(c.getParent());
         }
         //if this move is not possible... *poof*
-        if(!currentMoves.contains(destination)) {
+        boolean validMove = false;
+        for (Move m : currentMoves) {
+            if (m.endingPiece == destination) {
+                validMove = true;
+            }
+        }
+        if(!validMove) {
             currentPanel = originalPanel;
             c = originalPanel;
             destination = componentToPiece(c);
@@ -789,10 +801,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             for (int j = 0; j < pieces[0].length; j++) {
                 Piece p = pieces[i][j];
                 if (!(p instanceof EmptySquare) && (p.white == white)) {
-                    ArrayList<Piece> moves = p.getPossibleMoves();
-                    for (Piece m : moves) {
-                        totalMoves.add(new Move(p, m));
-                    }
+                    totalMoves.addAll(p.getPossibleMoves());
                 }
             }
         }

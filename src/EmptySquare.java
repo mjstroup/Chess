@@ -8,13 +8,13 @@ public class EmptySquare extends Piece {
         this.abbreviation = 'E';
     }
     @Override
-    public ArrayList<Piece> getPossibleMoves() {
-        ArrayList<Piece> list = new ArrayList<>();
+    public ArrayList<Move> getPossibleMoves() {
+        ArrayList<Move> list = new ArrayList<>();
         return list;
     }
     @Override
-    public ArrayList<Piece> getAttackingMoves() {
-        ArrayList<Piece> list = new ArrayList<>();
+    public ArrayList<Move> getAttackingMoves() {
+        ArrayList<Move> list = new ArrayList<>();
         return list;
     }
     public EmptySquare clonePiece() {

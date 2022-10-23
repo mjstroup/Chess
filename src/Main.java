@@ -4,17 +4,17 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         // Engine e = new Engine();
-        // Board b = new Board(Piece.defaultFEN, null);
+        Board b = new Board(Piece.defaultFEN, null);
         // Board b = new Board("rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1", null);
         // Board b = new Board("8/8/8/4p1K1/2k1P3/8/8/8 b - - 0 1", null);
         // Board b = new Board("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", null);
-        Board b = new Board("8/8/6K1/2n5/b5k1/4B3/8/8 w - - 0 1", null);
+        // Board b = new Board("8/8/6K1/2n5/b5k1/4B3/8/8 w - - 0 1", null);
         b.pack();
         b.setResizable(false);
         b.setLocationRelativeTo(null);
         b.setVisible(true);
         
-        // for (int i = 1; i < 2; i++) {
+        // for (int i = 1; i < 5; i++) {
         //     System.out.println("Depth " + i + ": " + moveGeneration(b, i));
         // }
     }
@@ -26,7 +26,6 @@ public class Main {
 
         int positions = 0;
         ArrayList<Move> moves = b.getAllTurnMoves();
-        System.out.println(moves);
 
         for (Move m : moves) {
             String fen = b.getFEN();

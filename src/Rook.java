@@ -9,19 +9,19 @@ public class Rook extends Piece {
         fileName = this.white ? "./Images/wR.png" : "./Images/bR.png";
     }
     @Override
-    public ArrayList<Piece> getPossibleMoves() {
-        ArrayList<Piece> list = new ArrayList<>();
+    public ArrayList<Move> getPossibleMoves() {
+        ArrayList<Move> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
         list.addAll(this.getAttackingMoves());
-        list.removeIf(p -> (!(p instanceof EmptySquare) && p.white == this.white));
+        list.removeIf(p -> (!(p.endingPiece instanceof EmptySquare) && p.endingPiece.white == this.white));
         //check test
         checkTest(list);
         return list;
     }
     @Override
-    public ArrayList<Piece> getAttackingMoves() {
-        ArrayList<Piece> list = new ArrayList<>();
+    public ArrayList<Move> getAttackingMoves() {
+        ArrayList<Move> list = new ArrayList<>();
         boolean left = true, up = true, right = true, down = true;
         for (int i = 1; i < 8; i++) {
             if (!(left || up || right || down)) break;
@@ -32,9 +32,9 @@ public class Rook extends Piece {
                 if (!(clocation-i <= 7 && clocation-i >= 0)) {
                     left = false;
                 } else if (p instanceof EmptySquare) {
-                    list.add(p);
+                    list.add(new Move(this, p));
                 } else {
-                    list.add(p);
+                    list.add(new Move(this, p));
                     left = false;
                 }
             }
@@ -45,9 +45,9 @@ public class Rook extends Piece {
                 if (!(rlocation-i <= 7 && rlocation-i >= 0)) {
                     up = false;
                 } else if (p instanceof EmptySquare) {
-                    list.add(p);
+                    list.add(new Move(this, p));
                 } else {
-                    list.add(p);
+                    list.add(new Move(this, p));
                     up = false;
                 }
             }
@@ -58,9 +58,9 @@ public class Rook extends Piece {
                 if (!(clocation+i <= 7 && clocation+i >= 0)) {
                     right = false;
                 } else if (p instanceof EmptySquare) {
-                    list.add(p);
+                    list.add(new Move(this, p));
                 } else {
-                    list.add(p);
+                    list.add(new Move(this, p));
                     right = false;
                 }
             }
@@ -71,9 +71,9 @@ public class Rook extends Piece {
                 if (!(rlocation+i <= 7 && rlocation+i >= 0)) {
                     down = false;
                 } else if (p instanceof EmptySquare) {
-                    list.add(p);
+                    list.add(new Move(this, p));
                 } else {
-                    list.add(p);
+                    list.add(new Move(this, p));
                     down = false;
                 }
             }
