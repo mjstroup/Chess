@@ -21,6 +21,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private static Engine engine;
     private static int halfMoveCount = 0;
     private static int fullMoveCount = 1;
+    private static HashMap<String, Integer> repeatMap;
     private Piece currentPiece;
     private ArrayList<Move> currentMoves;
     private JLayeredPane layeredPane;
@@ -36,6 +37,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public Board(String FENString, Engine e) {
         engine = e;
+        repeatMap = new HashMap<>();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pieces = fenStringToPieces(FENString);
         Dimension size = new Dimension(800,800);
@@ -480,7 +482,20 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         previousMoveCurrentPanel = currentPanel;
         
         whiteTurn = !whiteTurn;
-        //TODO: 3 move stalemate
+        //3 move stalemate
+        String fen = this.getFEN();
+        fen = fen.substring(0, Board.ordinalIndexOf(fen, " ", 4));
+        if (repeatMap.get(fen) != null) {
+            repeatMap.put(fen, repeatMap.get(fen)+1);
+        } else {
+            repeatMap.put(fen, 1);
+        }
+        if (repeatMap.get(fen) == 3) {
+            //stalemate
+            dispose();
+            System.out.println("Stalemate.");
+            System.exit(0);
+        }
         //stalemate checks
         //50 move rule
         if (halfMoveCount == 100) {
@@ -943,5 +958,15 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             s += "\n";
         }
         return s;
+    }
+    
+    /*
+     * https://stackoverflow.com/a/3976656
+     */
+    public static int ordinalIndexOf(String str, String substr, int n) {
+        int pos = str.indexOf(substr);
+        while (--n > 0 && pos != -1)
+            pos = str.indexOf(substr, pos + 1);
+        return pos;
     }
 }
