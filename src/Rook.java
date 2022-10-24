@@ -5,7 +5,7 @@ public class Rook extends Piece {
         this.rlocation = rlocation;
         this.clocation = clocation;
         this.white = white;
-        this.abbreviation = 'R';
+        this.abbreviation = 'r';
         fileName = this.white ? "./Images/wR.png" : "./Images/bR.png";
     }
     @Override

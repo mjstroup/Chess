@@ -5,7 +5,7 @@ public class Bishop extends Piece {
         this.rlocation = rlocation;
         this.clocation = clocation;
         this.white = white;
-        this.abbreviation = 'B';
+        this.abbreviation = 'b';
         fileName = this.white ? "./Images/wB.png" : "./Images/bB.png";
     }
     @Override

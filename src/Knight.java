@@ -5,7 +5,7 @@ public class Knight extends Piece {
         this.rlocation = rlocation;
         this.clocation = clocation;
         this.white = white;
-        this.abbreviation = 'N';
+        this.abbreviation = 'n';
         fileName = this.white ? "./Images/wN.png" : "./Images/bN.png";
     }
     @Override

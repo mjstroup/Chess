@@ -147,15 +147,18 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //if this move is not possible... *poof*
         boolean validMove = false;
+        Move validMoveMove = null;
         for (Move m : currentMoves) {
             if (m.endingPiece == destination) {
                 validMove = true;
+                validMoveMove = m;
             }
         }
         if(!validMove) {
             currentPanel = originalPanel;
             c = originalPanel;
             destination = componentToPiece(c);
+            validMoveMove = new Move(movingPiece, destination);
             returned = true;
         }
         piece.setVisible(false);
@@ -169,7 +172,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             parent.add(piece);
         }
         piece.setVisible(true);
-        movePiece(movingPiece, destination);
+        movePiece(validMoveMove);
 
         currentPanel.setBackground(currentPanelColor);
         originalPanel.setBackground(originalPanelColor);
@@ -189,7 +192,9 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
     }
 
-    public void movePiece(Piece movingPiece, Piece destination) {
+    public void movePiece(Move move) {
+        Piece movingPiece = move.startingPiece;
+        Piece destination = move.endingPiece;
         if (!(destination instanceof EmptySquare))
             moveIsCapture = true;
         if (movingPiece.equals(destination)) return;
@@ -312,7 +317,9 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         movingPiece.setLocation(destination.getR(), destination.getC());
     }
 
-    public void APImovePiece(Piece movingPiece, Piece destination) {
+    public void APImovePiece(Move move) {
+        Piece movingPiece = move.startingPiece;
+        Piece destination = move.endingPiece;
         if (!(destination instanceof EmptySquare))
             moveIsCapture = true;
         if (movingPiece.equals(destination)) return;
@@ -349,8 +356,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //remove castle rights
         if (movingPiece instanceof King) {
-            ((King)movingPiece).removeKingCastleRights();
-            ((King)movingPiece).removeQueenCastleRights();
+            ((King)pieces[movingPiece.rlocation][movingPiece.clocation]).removeKingCastleRights();
+            ((King)pieces[movingPiece.rlocation][movingPiece.clocation]).removeQueenCastleRights();
         }
         if (movingPiece instanceof Rook && (movingPiece == pieces[7][0] || movingPiece == pieces[7][7]) && movingPiece.white) {
             if (pieces[7][4] instanceof King) {
@@ -398,11 +405,20 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //pawn promote
         if (movingPiece instanceof Pawn && (destination.getR() == 0 || destination.getR() == 7)) {
-            //TODO: under promotion
-            if (destination.getR() == 0) {
-                pieces[destination.getR()][destination.getC()] = new Queen(true, 0, destination.getC());
-            } else {
-                pieces[destination.getR()][destination.getC()] = new Queen(false, 7, destination.getC());
+            char promoteCharacter = move.promCharacter;
+            switch (promoteCharacter) {
+                case 'q' -> {
+                    pieces[destination.getR()][destination.getC()] = new Queen(movingPiece.white, destination.getR(), destination.getC());
+                }
+                case 'r' -> {
+                    pieces[destination.getR()][destination.getC()] = new Rook(movingPiece.white, destination.getR(), destination.getC());
+                }
+                case 'b' -> {
+                    pieces[destination.getR()][destination.getC()] = new Bishop(movingPiece.white, destination.getR(), destination.getC());
+                }
+                case 'n' -> {
+                    pieces[destination.getR()][destination.getC()] = new Knight(movingPiece.white, destination.getR(), destination.getC());
+                }
             }
             currentPiece = pieces[destination.getR()][destination.getC()];
             pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
@@ -584,7 +600,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         endingPanel.add(pieceLabel);
         pieceLabel.setVisible(true);
 
-        movePiece(movingPiece, destination);
+        movePiece(move);
         
         this.originalPanel = startingPanel;
         this.currentPanel = endingPanel;
@@ -597,9 +613,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void APIMove(Move move) {
-        Piece movingPiece = move.startingPiece;
-        Piece destination = move.endingPiece;
-        APImovePiece(movingPiece, destination);
+        APImovePiece(move);
         whiteTurn = !whiteTurn;
     }
 
@@ -869,8 +883,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                         continue;
                     }
                 }
-                if (!Board.pieces[i][j].white) {
-                    c += 32;
+                if (Board.pieces[i][j].white) {
+                    c -= 32;
                 }
                 fen += c;
             }

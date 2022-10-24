@@ -5,7 +5,7 @@ public class Queen extends Piece {
         this.rlocation = rlocation;
         this.clocation = clocation;
         this.white = white;
-        this.abbreviation = 'Q';
+        this.abbreviation = 'q';
         fileName = this.white ? "./Images/wQ.png" : "./Images/bQ.png";
     }
     @Override

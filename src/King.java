@@ -7,7 +7,7 @@ public class King extends Piece {
         this.rlocation = rlocation;
         this.clocation = clocation;
         this.white = white;
-        this.abbreviation = 'K';
+        this.abbreviation = 'k';
         fileName = this.white ? "./Images/wK.png" : "./Images/bK.png";
     }
     @Override
