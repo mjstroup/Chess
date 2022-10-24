@@ -90,8 +90,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             originalPanel.setBackground(darkCover);
         currentPiece = componentToPiece(currentPanel);
         currentMoves = currentPiece.getPossibleMoves();
-        System.out.println(currentPiece);
-        System.out.println(currentMoves);
+        // System.out.println(currentPiece);
+        // System.out.println(currentMoves);
     }
 
     public void mouseDragged(MouseEvent me) {
@@ -152,6 +152,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             if (m.endingPiece == destination) {
                 validMove = true;
                 validMoveMove = m;
+                break;
             }
         }
         if(!validMove) {
@@ -162,10 +163,12 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             returned = true;
         }
         piece.setVisible(false);
+        
         if (c instanceof JLabel) {
             Container parent = c.getParent();
             c = c.getParent();
-            parent.remove(0);
+            while (parent.getComponentCount() != 0)
+                parent.remove(0);
             parent.add(piece);
         } else {
             Container parent = (Container)c;
@@ -298,14 +301,25 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //pawn promote
         if (movingPiece instanceof Pawn && (destination.getR() == 0 || destination.getR() == 7)) {
-            if (destination.getR() == 0) {
-                pieces[destination.getR()][destination.getC()] = new Queen(true, 0, destination.getC());
-            } else {
-                pieces[destination.getR()][destination.getC()] = new Queen(false, 7, destination.getC());
+            char promoteCharacter = move.promCharacter;
+            switch (promoteCharacter) {
+                case 'q' -> {
+                    pieces[destination.getR()][destination.getC()] = new Queen(movingPiece.white, destination.getR(), destination.getC());
+                }
+                case 'r' -> {
+                    pieces[destination.getR()][destination.getC()] = new Rook(movingPiece.white, destination.getR(), destination.getC());
+                }
+                case 'b' -> {
+                    pieces[destination.getR()][destination.getC()] = new Bishop(movingPiece.white, destination.getR(), destination.getC());
+                }
+                case 'n' -> {
+                    pieces[destination.getR()][destination.getC()] = new Knight(movingPiece.white, destination.getR(), destination.getC());
+                }
             }
             currentPiece = pieces[destination.getR()][destination.getC()];
             Image image = (new ImageIcon(currentPiece.fileName)).getImage();
             image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+            
             piece.setIcon(new ImageIcon(image));
             pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
             movingPiece.setLocation(destination.getR(), destination.getC());
@@ -600,6 +614,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         endingPanel.add(pieceLabel);
         pieceLabel.setVisible(true);
 
+        piece = pieceLabel;
+
         movePiece(move);
         
         this.originalPanel = startingPanel;
@@ -610,6 +626,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         originalPanel = null;
         currentPanel = null;
         moveIsCapture = false;
+        piece = null;
     }
 
     public void APIMove(Move move) {
