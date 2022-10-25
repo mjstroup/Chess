@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         Engine e = new Engine();
         Board b = new Board(Piece.defaultFEN, e);
-        // Board b = new Board("rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1", null);
+        // Board b = new Board("rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1", null);X
         // Board b = new Board("8/8/8/4p1K1/2k1P3/8/8/8 b - - 0 1", null);
         // Board b = new Board("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", null);
         // Board b = new Board("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPPKNnPP/RNBQ3R b - - 1 8", null);
@@ -17,7 +17,7 @@ public class Main {
         b.setVisible(true);
         
         
-        // runGeneration(b, 5);
+        runGeneration(b, 5);
     }
 
     public static void runGeneration(Board b, int depth) {

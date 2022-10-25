@@ -15,7 +15,9 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     final Color darkCover = new Color(133,120,78);
     final Color previousMoveOriginalColor = new Color(206,175,104);
     final Color previousMoveDestColor = new Color(215,205,118);
-
+    
+    public static King whiteKing;
+    public static King blackKing;
     public static boolean whiteTurn = true;
     public static Piece[][] pieces;
     private static Engine engine;
@@ -710,10 +712,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         Piece[][] pieces = new Piece[8][8];
         int rcounter = 0;
         int ccounter = 0;
-        int wKingr = -1;
-        int wKingc = -1;
-        int bKingr = -1;
-        int bKingc = -1;
         
         //fill out table
         for (int i = 0; i < FENString.indexOf(" "); i++) {
@@ -734,8 +732,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 }
                 case 'K' -> {
                     pieces[rcounter][ccounter] = new King(true, rcounter, ccounter);
-                    wKingr = rcounter;
-                    wKingc = ccounter;
+                    whiteKing = (King)pieces[rcounter][ccounter];
                 }
                 case 'P' -> {
                     pieces[rcounter][ccounter] = new Pawn(true, rcounter, ccounter);
@@ -754,8 +751,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 }
                 case 'k' -> {
                     pieces[rcounter][ccounter] = new King(false, rcounter, ccounter);
-                    bKingr = rcounter;
-                    bKingc = ccounter;
+                    blackKing = (King)pieces[rcounter][ccounter];
                 }
                 case 'p' -> {
                     pieces[rcounter][ccounter] = new Pawn(false, rcounter, ccounter);
@@ -802,16 +798,16 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             char c = FENString.charAt(i);
             switch (c) {
                 case 'K' -> {
-                    ((King)(pieces[wKingr][wKingc])).kingCastleRights = true;
+                    whiteKing.kingCastleRights = true;
                 }
                 case 'Q' -> {
-                    ((King)(pieces[wKingr][wKingc])).queenCastleRights = true;
+                    whiteKing.queenCastleRights = true;
                 }
                 case 'k' -> {
-                    ((King)(pieces[bKingr][bKingc])).kingCastleRights = true;
+                    blackKing.kingCastleRights = true;
                 }
                 case 'q' -> {
-                    ((King)(pieces[bKingr][bKingc])).queenCastleRights = true;
+                    blackKing.queenCastleRights = true;
                 }
             }
         }
@@ -867,31 +863,20 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public String getCastlingRights() {
-        String white = "";
-        String black = "";
-        for (int i = 0; i < pieces.length; i++) {
-            for (int j = 0; j < pieces[0].length; j++) {
-                if (!(pieces[i][j] instanceof King)) continue;
-                King p = (King)pieces[i][j];
-                if (p instanceof King && p.white) {
-                    if (p.kingCastleRights)  {
-                        white += "K";
-                    }
-                    if (p.queenCastleRights) {
-                        white += "Q";
-                    }
-                }
-                if (p instanceof King && !p.white) {
-                    if (p.kingCastleRights)  {
-                        white += "k";
-                    }
-                    if (p.queenCastleRights) {
-                        white += "q";
-                    }
-                }
-            }
+        String rights = "";
+        if (whiteKing.kingCastleRights) {
+            rights += "K";
         }
-        return white + black;
+        if (whiteKing.queenCastleRights) {
+            rights += "Q";
+        }
+        if (blackKing.kingCastleRights) {
+            rights += 'k';
+        }
+        if (blackKing.queenCastleRights) {
+            rights += 'q';
+        }
+        return rights;
     }
 
     public String getFEN() {
