@@ -652,15 +652,63 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void APIMove(Move move) {
-        //TODO: UGHH
-        previousGamestates.push(new Gamestate(pieces.clone(), whiteTurn, repeatMap, halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights));
+        previousGamestates.push(new Gamestate(whiteTurn, repeatMap, halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights));
         APImovePiece(move);
         whiteTurn = !whiteTurn;
     }
 
-    public void APIUnMove() {
+    public void APIUnMove(Move move, Move clone) {
         Gamestate g = previousGamestates.pop();
-        pieces = g.pieces;
+        Piece movingPiece = move.startingPiece;
+        Piece destination = move.endingPiece;
+
+        if (movingPiece instanceof King && Math.abs(movingPiece.getR() - destination.getR()) == 2) {
+            //last move was a castle
+            int row = movingPiece.rlocation;
+            if (clone.endingPiece.getC() == 6) {
+                //king side
+                //rook
+                pieces[row][7] = pieces[row][5];
+                pieces[row][7].setLocation(row, 7);
+                //king
+                pieces[row][4] = pieces[row][6];
+                pieces[row][4].setLocation(row, 4);
+                //empty king and rook orig squares
+                pieces[row][5] = new EmptySquare(row, 5);
+                pieces[row][6] = new EmptySquare(row, 6);
+            } else if (destination.getC() == 2) {
+                //queen side
+                //rook
+                pieces[row][0] = pieces[row][3];
+                pieces[row][0].setLocation(row, 0);
+                //king
+                pieces[row][4] = pieces[row][2];
+                pieces[row][4].setLocation(row, 4);
+                //empty king and rook orig squares
+                pieces[row][2] = new EmptySquare(row, 2);
+                pieces[row][3] = new EmptySquare(row, 3);
+            }
+        } else if (movingPiece instanceof Pawn && destination instanceof EmptySquare && Math.abs(destination.getC()-movingPiece.getC()) != 0) {
+            movingPiece.rlocation = clone.startingPiece.rlocation;
+            movingPiece.clocation = clone.startingPiece.clocation;
+            destination.rlocation = clone.endingPiece.rlocation;
+            destination.clocation = clone.endingPiece.clocation;
+            pieces[movingPiece.rlocation][movingPiece.clocation] = movingPiece;
+            pieces[destination.rlocation][destination.clocation] = destination;
+            if (movingPiece.white) {
+                pieces[destination.rlocation+1][destination.clocation] = new Pawn(false, destination.rlocation+1, destination.clocation);
+            } else {
+                pieces[destination.rlocation-1][destination.clocation] = new Pawn(true, destination.rlocation-1, destination.clocation);
+            }
+        } else {
+            movingPiece.rlocation = clone.startingPiece.rlocation;
+            movingPiece.clocation = clone.startingPiece.clocation;
+            destination.rlocation = clone.endingPiece.rlocation;
+            destination.clocation = clone.endingPiece.clocation;
+            pieces[movingPiece.rlocation][movingPiece.clocation] = movingPiece;
+            pieces[destination.rlocation][destination.clocation] = destination;
+        }
+
         whiteTurn = g.whiteTurn;
         repeatMap = g.repeatMap;
         halfMoveCount = g.halfMoveCount;
@@ -669,12 +717,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         whiteKing.queenCastleRights = g.WQC;
         blackKing.kingCastleRights = g.BKC;
         blackKing.queenCastleRights = g.BQC;
-        for (int i = 0; i < pieces.length; i++) {
-            for (int j = 0; j < pieces[0].length; j++) {
-                pieces[i][j].rlocation = i;
-                pieces[i][j].clocation = j;
-            }
-        }
     }
 
     public static String pieceToCoords(Piece p) {

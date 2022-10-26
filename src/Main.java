@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit;
 
 public class Main {
     public static void main(String[] args) {
-        Engine e = new Engine();
+        // Engine e = new Engine();
         Board b = new Board(Piece.defaultFEN, null);
         // Board b = new Board("rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1", null);
         // Board b = new Board("8/8/8/4p1K1/2k1P3/8/8/8 b - - 0 1", null);
@@ -17,7 +17,7 @@ public class Main {
         b.setVisible(true);
         
         
-        runGeneration(b, 2);
+        runGeneration(b, 5);
     }
 
     public static void runGeneration(Board b, int depth) {
@@ -37,12 +37,14 @@ public class Main {
         int positions = 0;
         ArrayList<Move> moves = b.getAllTurnMoves();
         for (Move m : moves) {
+            Move clone = new Move(m.startingPiece.clonePiece(), m.endingPiece.clonePiece());
             // System.out.println("Before move:\n" + b);
             b.APIMove(m);
             // System.out.println("After move:\n" + b);
+            // System.out.println("Move: " + m);
             int add = moveGeneration(b, depth-1);
             positions += add;
-            b.APIUnMove();
+            b.APIUnMove(m, clone);
             // System.out.println("After unmove:\n" + b);
         }
 

@@ -3,7 +3,6 @@ package src;
 import java.util.*;
 
 public class Gamestate {
-    Piece[][] pieces;
     HashMap<String, Integer> repeatMap;
     int halfMoveCount = 0;
     int fullMoveCount = 1;
@@ -12,8 +11,7 @@ public class Gamestate {
     boolean WQC;
     boolean BKC;
     boolean BQC;
-    public Gamestate(Piece[][] pieces, boolean whiteTurn, HashMap<String, Integer> repeatMap, int halfMoveCount, int fullMoveCount, boolean WKC, boolean WQC, boolean BKC, boolean BQC) {
-        this.pieces = pieces;
+    public Gamestate(boolean whiteTurn, HashMap<String, Integer> repeatMap, int halfMoveCount, int fullMoveCount, boolean WKC, boolean WQC, boolean BKC, boolean BQC) {
         this.whiteTurn = whiteTurn;
         this.repeatMap = repeatMap;
         this.halfMoveCount = halfMoveCount;
