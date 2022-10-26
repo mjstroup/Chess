@@ -8,17 +8,88 @@ public class Bishop extends Piece {
         this.abbreviation = 'b';
         fileName = this.white ? "./Images/wB.png" : "./Images/bB.png";
     }
+
     @Override
     public ArrayList<Move> getPossibleMoves() {
         ArrayList<Move> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
-        list.addAll(this.getAttackingMoves());
-        list.removeIf(p -> (!(p.endingPiece instanceof EmptySquare) && p.endingPiece.white == this.white));
-        //check test
-        checkTest(list);
+        if (this.isPinned() != null) {
+            return this.getPinnedMoves();
+        } else {
+            list.addAll(this.getAttackingMoves());
+            list.removeIf(p -> (!(p.endingPiece instanceof EmptySquare) && p.endingPiece.white == this.white));
+        }
         return list;
     }
+
+    @Override
+    public ArrayList<Move> getPinnedMoves() {
+        ArrayList<Move> list = new ArrayList<>();
+        Piece attacker = this.isPinned();
+        int rdif = attacker.rlocation - this.rlocation;
+        int cdif = attacker.clocation - this.clocation;
+        if (rdif * cdif != 0) {
+            //diagonal
+            boolean topLeft = true, topRight = true, bottomLeft = true, bottomRight = true;
+            if (rdif *cdif > 0) {
+                bottomLeft = false;
+                topRight = false;
+            } else {
+                bottomRight = false;
+                topLeft = false;
+            }
+            for (int i = 1; i < 8; i++) {
+                if (!(topLeft || topRight || bottomLeft || bottomRight)) break;
+                if (topLeft) {
+                    Piece p = Board.pieces[rlocation-i][clocation-i];
+                    if (p instanceof EmptySquare) {
+                        list.add(new Move(this, p));
+                    } else if (p instanceof King && p.white == this.white) {
+                        topLeft = false;
+                    } else if (p == attacker) {
+                        list.add(new Move(this, p));
+                        topLeft = false;
+                    }
+                }
+                if (topRight) {
+                    Piece p = Board.pieces[rlocation-i][clocation+i];
+                    if (p instanceof EmptySquare) {
+                        list.add(new Move(this, p));
+                    } else if (p instanceof King && p.white == this.white) {
+                        topRight = false;
+                    } else if (p == attacker) {
+                        list.add(new Move(this, p));
+                        topRight = false;
+                    }
+                }
+                if (bottomLeft) {
+                    Piece p = Board.pieces[rlocation+i][clocation-i];
+                    if (p instanceof EmptySquare) {
+                        list.add(new Move(this, p));
+                    } else if (p instanceof King && p.white == this.white) {
+                        bottomLeft = false;
+                    } else if (p == attacker) {
+                        list.add(new Move(this, p));
+                        bottomLeft = false;
+                    }
+                }
+                if (bottomRight) {
+                    Piece p = Board.pieces[rlocation+i][clocation+i];
+                    if (p instanceof EmptySquare) {
+                        list.add(new Move(this, p));
+                    } else if (p instanceof King && p.white == this.white) {
+                        bottomRight = false;
+                    } else if (p == attacker) {
+                        list.add(new Move(this, p));
+                        bottomRight = false;
+                    }
+                }
+            }   
+        }
+        return list;
+    }
+
     @Override
     public ArrayList<Move> getAttackingMoves() {
         ArrayList<Move> list = new ArrayList<>();
@@ -33,6 +104,8 @@ public class Bishop extends Piece {
                     topLeft = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
                 } else {
                     list.add(new Move(this, p));
                     topLeft = false;
@@ -45,6 +118,8 @@ public class Bishop extends Piece {
                 if (!(rlocation-i >= 0 && rlocation-i <= 7 && clocation+i >= 0 && clocation+i <= 7)) {
                     topRight = false;
                 } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
                     list.add(new Move(this, p));
                 } else {
                     list.add(new Move(this, p));
@@ -59,6 +134,8 @@ public class Bishop extends Piece {
                     bottomLeft = false;
                 } else if (p instanceof EmptySquare) {
                     list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
                 } else {
                     list.add(new Move(this, p));
                     bottomLeft = false;
@@ -71,6 +148,8 @@ public class Bishop extends Piece {
                 if (!(rlocation+i >= 0 && rlocation+i <= 7 && clocation+i >= 0 && clocation+i <= 7)) {
                     bottomRight = false;
                 } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
                     list.add(new Move(this, p));
                 } else {
                     list.add(new Move(this, p));

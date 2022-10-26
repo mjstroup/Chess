@@ -93,9 +93,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         else
             originalPanel.setBackground(darkCover);
         currentPiece = componentToPiece(currentPanel);
-        currentMoves = currentPiece.getPossibleMoves();
+        currentMoves = currentPiece.getLegalMoves();
         // System.out.println(currentPiece);
         // System.out.println(currentMoves);
+        // System.out.println(currentPiece.isPinned());
     }
 
     public void mouseDragged(MouseEvent me) {
@@ -374,8 +375,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //remove castle rights
         if (movingPiece instanceof King) {
-            ((King)pieces[movingPiece.rlocation][movingPiece.clocation]).removeKingCastleRights();
-            ((King)pieces[movingPiece.rlocation][movingPiece.clocation]).removeQueenCastleRights();
+            ((King)pieces[movingPiece.getR()][movingPiece.getC()]).removeKingCastleRights();
+            ((King)pieces[movingPiece.getR()][movingPiece.getC()]).removeQueenCastleRights();
         }
         if (movingPiece instanceof Rook && (movingPiece == pieces[7][0] || movingPiece == pieces[7][7]) && movingPiece.white) {
             if (pieces[7][4] instanceof King) {
@@ -564,13 +565,15 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //2 kings + 2 bishop same color
         if (whitePieces.size() == 2 && blackPieces.size() == 2) {
-            Bishop white = whitePieces.get(0) instanceof King ? (Bishop)whitePieces.get(1) : (Bishop)whitePieces.get(0);
-            Bishop black = blackPieces.get(0) instanceof King ? (Bishop)blackPieces.get(1) : (Bishop)blackPieces.get(0);
-            if ((white.rlocation + white.clocation) % 2 == (black.rlocation + black.clocation) % 2) {
-                //stalemate
-                dispose();
-                System.out.println("Stalemate.");
-                System.exit(0);
+            if ((whitePieces.get(0) instanceof Bishop || whitePieces.get(1) instanceof Bishop) && (blackPieces.get(0) instanceof Bishop || blackPieces.get(1) instanceof Bishop)) {
+                Bishop white = whitePieces.get(0) instanceof King ? (Bishop)whitePieces.get(1) : (Bishop)whitePieces.get(0);
+                Bishop black = blackPieces.get(0) instanceof King ? (Bishop)blackPieces.get(1) : (Bishop)blackPieces.get(0);
+                if ((white.getR() + white.getC()) % 2 == (black.getR() + black.getC()) % 2) {
+                    //stalemate
+                    dispose();
+                    System.out.println("Stalemate.");
+                    System.exit(0);
+                }
             }
         }
         //checkmate check
@@ -579,7 +582,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         for (int i = 0; i < pieces.length; i++) {
             for (int j = 0; j < pieces[0].length; j++) {
                 Piece p = pieces[i][j];
-                if (p.white != movingPiece.white && p.getPossibleMoves().size() != 0) {
+                if (p.white != movingPiece.white && p.getLegalMoves().size() != 0) {
                     checkmate = false;
                     stalemate = false;
                 }
@@ -843,7 +846,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             for (int j = 0; j < pieces[0].length; j++) {
                 Piece p = pieces[i][j];
                 if (!(p instanceof EmptySquare) && (p.white == white)) {
-                    totalMoves.addAll(p.getPossibleMoves());
+                    totalMoves.addAll(p.getLegalMoves());
                 }
             }
         }
@@ -938,7 +941,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         String s = "";
         for (int i = 0; i < pieces.length; i++) {
             for (int j = 0; j < pieces[0].length; j++) {
-                s += String.format("%c(%d,%d) ", pieces[i][j].abbreviation, pieces[i][j].rlocation, pieces[i][j].clocation);
+                s += String.format("%c(%d,%d) ", pieces[i][j].abbreviation, pieces[i][j].getR(), pieces[i][j].getC());
             }
             s += "\n";
         }

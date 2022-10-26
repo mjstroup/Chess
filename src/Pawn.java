@@ -8,25 +8,30 @@ public class Pawn extends Piece {
         this.abbreviation = 'p';
         fileName = this.white ? "./Images/wP.png" : "./Images/bP.png";
     }
+
     @Override
     public ArrayList<Move> getPossibleMoves() {
         ArrayList<Move> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
+        if (this.isPinned() != null) {
+            return this.getPinnedMoves();
+        }
+
         //en passant left white
-        if (this.white && this.clocation != 0 && Board.pieces[rlocation-1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation-1]).enPassant) {
+        if (this.white && this.clocation != 0 && Board.pieces[rlocation-1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation-1]).enPassant && vaildateEP()) {
             list.add(new Move(this, Board.pieces[rlocation-1][clocation-1]));
         }
         //en passant right white
-        if (this.white && this.clocation != 7 && Board.pieces[rlocation-1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation+1]).enPassant) {
+        if (this.white && this.clocation != 7 && Board.pieces[rlocation-1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation+1]).enPassant && vaildateEP()) {
             list.add(new Move(this, Board.pieces[rlocation-1][clocation+1]));
         }
         //en passant left black
-        if (!this.white && this.clocation != 0 && Board.pieces[rlocation+1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation-1]).enPassant) {
+        if (!this.white && this.clocation != 0 && Board.pieces[rlocation+1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation-1]).enPassant && vaildateEP()) {
             list.add(new Move(this, Board.pieces[rlocation+1][clocation-1]));
         }
         //en passant right black
-        if (!this.white && this.clocation != 7 && Board.pieces[rlocation+1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation+1]).enPassant) {
+        if (!this.white && this.clocation != 7 && Board.pieces[rlocation+1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation+1]).enPassant && vaildateEP()) {
             list.add(new Move(this, Board.pieces[rlocation+1][clocation+1]));
         }
         if (this.white) {
@@ -69,7 +74,6 @@ public class Pawn extends Piece {
                     list.add(new Move(this, aheadByOne, 'b'));
                     list.add(new Move(this, aheadByOne, 'n'));
                 }
-
             }
         } else {
             //captures
@@ -113,11 +117,98 @@ public class Pawn extends Piece {
                 }
             }
         }
-
-        //check test
-        checkTest(list);
         return list;
     }
+
+    @Override
+    public ArrayList<Move> getPinnedMoves() {
+        ArrayList<Move> list = new ArrayList<>();
+        Piece attacker = this.isPinned();
+        int rdif = attacker.rlocation - this.rlocation;
+        int cdif = attacker.clocation - this.clocation;
+        if (cdif == 0) {
+            if (this.white) {
+                Piece aheadByOne = Board.pieces[rlocation-1][clocation];
+                if (this.rlocation == 6 && aheadByOne instanceof EmptySquare && Board.pieces[rlocation-2][clocation] instanceof EmptySquare)
+                    list.add(new Move(this, Board.pieces[rlocation-2][clocation]));
+                list.add(new Move(this, aheadByOne));
+            } else {
+                Piece aheadByOne = Board.pieces[rlocation+1][clocation];
+                if (this.rlocation == 1 && aheadByOne instanceof EmptySquare & Board.pieces[rlocation+2][clocation] instanceof EmptySquare)
+                    list.add(new Move(this, Board.pieces[rlocation+2][clocation]));
+                list.add(new Move(this, aheadByOne));
+            }
+        }
+        if (cdif*rdif > 0) {
+            if (this.white && Board.pieces[rlocation-1][clocation-1] == attacker) {
+                if (attacker.rlocation == 0) {
+                    list.add(new Move(this, attacker, 'q'));
+                    list.add(new Move(this, attacker, 'r'));
+                    list.add(new Move(this, attacker, 'b'));
+                    list.add(new Move(this, attacker, 'n'));
+                } else {
+                    list.add(new Move(this, attacker));
+                }
+            } else if (!this.white && Board.pieces[rlocation+1][clocation+1] == attacker) {
+                if (attacker.rlocation == 7) {
+                    list.add(new Move(this, attacker, 'q'));
+                    list.add(new Move(this, attacker, 'r'));
+                    list.add(new Move(this, attacker, 'b'));
+                    list.add(new Move(this, attacker, 'n'));
+                } else {
+                    list.add(new Move(this, attacker));  
+                }
+            }
+        } else if (cdif*rdif < 0) {
+            if (this.white && Board.pieces[rlocation-1][clocation+1] == attacker) {
+                if (attacker.rlocation == 0) {
+                    list.add(new Move(this, attacker, 'q'));
+                    list.add(new Move(this, attacker, 'r'));
+                    list.add(new Move(this, attacker, 'b'));
+                    list.add(new Move(this, attacker, 'n'));
+                } else {
+                    list.add(new Move(this, attacker));
+                }
+            } else if(!this.white && Board.pieces[rlocation+1][clocation-1] == attacker) {
+                if (attacker.rlocation == 7) {
+                    list.add(new Move(this, attacker, 'q'));
+                    list.add(new Move(this, attacker, 'r'));
+                    list.add(new Move(this, attacker, 'b'));
+                    list.add(new Move(this, attacker, 'n'));
+                } else {
+                    list.add(new Move(this, attacker));  
+                }
+            }
+        }
+        return list;
+    }
+
+    public boolean vaildateEP() {
+        ArrayList<String> whiteInvalid = new ArrayList<>(List.of("KpPq", "KpPr", "KPpq", "KPpr", "qpPK", "rpPK", "qPpK", "rPpK"));
+        ArrayList<String> blackInvalid = new ArrayList<>(List.of("kPpQ", "kPpR", "kpPQ", "kpPR", "QPpk", "RPpk", "QpPk", "RpPk"));
+        String fen = "";
+        for (int i = 0; i < Board.pieces.length; i++) {
+            if (Board.pieces[rlocation][i] instanceof EmptySquare) continue;
+            char c = Board.pieces[rlocation][i].abbreviation;
+            if (Board.pieces[rlocation][i].white) {
+                c -= 32;
+            }
+            fen += c;
+        }
+        if (this.white) {
+            for (int i = 0; i < whiteInvalid.size(); i++) {
+                if (fen.indexOf(whiteInvalid.get(i)) != -1)
+                    return false;
+            }
+        } else {
+            for (int i = 0; i < blackInvalid.size(); i++) {
+                if (fen.indexOf(blackInvalid.get(i)) != -1)
+                    return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public ArrayList<Move> getAttackingMoves() {
         ArrayList<Move> list = new ArrayList<>();

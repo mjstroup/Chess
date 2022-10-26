@@ -10,6 +10,7 @@ public class King extends Piece {
         this.abbreviation = 'k';
         fileName = this.white ? "./Images/wK.png" : "./Images/bK.png";
     }
+
     @Override
     public ArrayList<Move> getPossibleMoves() {
         ArrayList<Move> list = new ArrayList<>();
@@ -54,21 +55,19 @@ public class King extends Piece {
             for (int j = -1; j < 2; j++) {
                 int r = rlocation + i;
                 int c = clocation + j;
-                if (r <= 7 && r >= 0 && c <= 7 && c >= 0 && (Board.pieces[r][c] instanceof EmptySquare || Board.pieces[r][c].white != this.white))
-                    list.add(new Move(this, Board.pieces[r][c]));
+                if (r <= 7 && r >= 0 && c <= 7 && c >= 0 && (Board.pieces[r][c] instanceof EmptySquare || Board.pieces[r][c].white != this.white) && ((this.white && !Board.pieces[r][c].isAttackedByBlack()) || (!this.white && !Board.pieces[r][c].isAttackedByWhite())))
+                    list.add(new Move(this, Board.pieces[r][c])); 
             }
         }
-        
-        //check test
-        checkTest(list);
         return list;
     }
-    public void removeQueenCastleRights() {
-        this.queenCastleRights = false;
+
+    @Override
+    public ArrayList<Move> getPinnedMoves() {
+        ArrayList<Move> list = new ArrayList<>();
+        return list;
     }
-    public void removeKingCastleRights() {
-        this.kingCastleRights = false;
-    }
+
     @Override
     public ArrayList<Move> getAttackingMoves() {
         ArrayList<Move> list = new ArrayList<>();
@@ -81,6 +80,13 @@ public class King extends Piece {
             }
         }
         return list;
+    }
+
+    public void removeQueenCastleRights() {
+        this.queenCastleRights = false;
+    }
+    public void removeKingCastleRights() {
+        this.kingCastleRights = false;
     }
     
     public King clonePiece() {

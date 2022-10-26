@@ -8,23 +8,38 @@ public class Queen extends Piece {
         this.abbreviation = 'q';
         fileName = this.white ? "./Images/wQ.png" : "./Images/bQ.png";
     }
+
     @Override
     public ArrayList<Move> getPossibleMoves() {
         ArrayList<Move> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
-        list.addAll(this.getAttackingMoves());
-        list.removeIf(p -> (!(p.endingPiece instanceof EmptySquare) && p.endingPiece.white == this.white));
-
-        //check test
-        checkTest(list);
+        if (this.isPinned() != null) {
+            return this.getPinnedMoves();
+        } else {
+            list.addAll(this.getAttackingMoves());
+            list.removeIf(p -> (!(p.endingPiece instanceof EmptySquare) && p.endingPiece.white == this.white));
+        }
         return list;
     }
+
+    @Override
+    public ArrayList<Move> getPinnedMoves() {
+        ArrayList<Move> list = new ArrayList<>();
+        ArrayList<Move> tempList = new Rook(this.white, this.rlocation, this.clocation).getPinnedMoves();
+        tempList.addAll(new Bishop(this.white, this.rlocation, this.clocation).getPinnedMoves());
+        for (Move m : tempList) {
+            m.startingPiece = this;
+        }
+        list.addAll(tempList);
+        return list;
+    }
+
     @Override
     public ArrayList<Move> getAttackingMoves() {
         ArrayList<Move> list = new ArrayList<>();
-        ArrayList<Move> tempList = new Rook(this.white, this.getR(), this.getC()).getAttackingMoves();
-        tempList.addAll(new Bishop(this.white, this.getR(), this.getC()).getAttackingMoves());
+        ArrayList<Move> tempList = new Rook(this.white, this.rlocation, this.clocation).getAttackingMoves();
+        tempList.addAll(new Bishop(this.white, this.rlocation, this.clocation).getAttackingMoves());
         for (Move m : tempList) {
             m.startingPiece = this;
         }

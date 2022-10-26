@@ -8,17 +8,27 @@ public class Knight extends Piece {
         this.abbreviation = 'n';
         fileName = this.white ? "./Images/wN.png" : "./Images/bN.png";
     }
+
     @Override
     public ArrayList<Move> getPossibleMoves() {
         ArrayList<Move> list = new ArrayList<>();
         if (Board.whiteTurn != this.white)
             return list;
-        list.addAll(this.getAttackingMoves());
-        list.removeIf(p -> (!(p.endingPiece instanceof EmptySquare) && p.endingPiece.white == this.white));
-        //check test
-        checkTest(list);
+        if (this.isPinned() != null) {
+            return this.getPinnedMoves();
+        } else {
+            list.addAll(this.getAttackingMoves());
+            list.removeIf(p -> (!(p.endingPiece instanceof EmptySquare) && p.endingPiece.white == this.white));
+        }
         return list;
     }
+
+    @Override
+    public ArrayList<Move> getPinnedMoves() {
+        ArrayList<Move> list = new ArrayList<>();
+        return list;
+    }
+
     @Override
     public ArrayList<Move> getAttackingMoves() {
         ArrayList<Move> list = new ArrayList<>();
