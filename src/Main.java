@@ -17,7 +17,7 @@ public class Main {
         b.setVisible(true);
         
         
-        runGeneration(b, 5);
+        runGeneration(b, 2);
     }
 
     public static void runGeneration(Board b, int depth) {
@@ -37,12 +37,13 @@ public class Main {
         int positions = 0;
         ArrayList<Move> moves = b.getAllTurnMoves();
         for (Move m : moves) {
-            String fen = b.getFEN();
-            b.APIMove(new Move(m.startingPiece.clonePiece(), m.endingPiece.clonePiece(), m.promCharacter));
-            Board.pieces = b.fenStringToPieces(b.getFEN());
+            // System.out.println("Before move:\n" + b);
+            b.APIMove(m);
+            // System.out.println("After move:\n" + b);
             int add = moveGeneration(b, depth-1);
             positions += add;
-            Board.pieces = b.fenStringToPieces(fen);
+            b.APIUnMove();
+            // System.out.println("After unmove:\n" + b);
         }
 
         return positions;

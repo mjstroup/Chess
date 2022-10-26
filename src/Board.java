@@ -36,10 +36,12 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private JPanel previousMoveCurrentPanel;
     private JLabel piece;
     private boolean moveIsCapture = false;
+    private Stack<Gamestate> previousGamestates;
 
     public Board(String FENString, Engine e) {
         engine = e;
         repeatMap = new HashMap<>();
+        previousGamestates = new Stack<>();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pieces = fenStringToPieces(FENString);
         Dimension size = new Dimension(800,800);
@@ -650,13 +652,29 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void APIMove(Move move) {
+        //TODO: UGHH
+        previousGamestates.push(new Gamestate(pieces.clone(), whiteTurn, repeatMap, halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights));
         APImovePiece(move);
         whiteTurn = !whiteTurn;
     }
 
-    public void APIUnMove(Piece[][] copyPieces) {
-        Board.pieces = copyPieces;
-        whiteTurn = !whiteTurn;
+    public void APIUnMove() {
+        Gamestate g = previousGamestates.pop();
+        pieces = g.pieces;
+        whiteTurn = g.whiteTurn;
+        repeatMap = g.repeatMap;
+        halfMoveCount = g.halfMoveCount;
+        fullMoveCount = g.fullMoveCount;
+        whiteKing.kingCastleRights = g.WKC;
+        whiteKing.queenCastleRights = g.WQC;
+        blackKing.kingCastleRights = g.BKC;
+        blackKing.queenCastleRights = g.BQC;
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[0].length; j++) {
+                pieces[i][j].rlocation = i;
+                pieces[i][j].clocation = j;
+            }
+        }
     }
 
     public static String pieceToCoords(Piece p) {
