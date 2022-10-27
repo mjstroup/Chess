@@ -129,18 +129,28 @@ public class Piece {
             }
             //1. take piece
             if (this.isPinned() == null) {
+                //EP take
+                if ((this.clocation != 0 && Board.pieces[this.rlocation][this.clocation-1] == attacker || this.clocation != 7 && Board.pieces[this.rlocation][this.clocation+1] == attacker) && this.white && this instanceof Pawn && !attacker.white && attacker.rlocation != 0 && Board.pieces[attacker.rlocation-1][attacker.clocation] == Board.enPassantPiece && Board.enPassantPiece.enPassant) {
+                    list.add(new Move(this, Board.enPassantPiece));
+                }
+                if ((this.clocation != 0 && Board.pieces[this.rlocation][this.clocation-1] == attacker || this.clocation != 7 && Board.pieces[this.rlocation][this.clocation+1] == attacker) && !this.white && this instanceof Pawn && attacker.white && attacker.rlocation != 7 && Board.pieces[attacker.rlocation+1][attacker.clocation] == Board.enPassantPiece && Board.enPassantPiece.enPassant) {
+
+                    list.add(new Move(this, Board.enPassantPiece));
+                }
                 if (attacker.white && attacker.attackedByBlackList().contains(this)) {
                     for (Move m : this.getPossibleMoves()) {
                         if (m.endingPiece == attacker) {
                             list.add(m);
-                            break;
+                            if (!(this instanceof Pawn))
+                                break;
                         }
                     }
                 } else if (!attacker.white && attacker.attackedByWhiteList().contains(this)) {
                     for (Move m : this.getPossibleMoves()) {
                         if (m.endingPiece == attacker) {
                             list.add(m);
-                            break;
+                            if (!(this instanceof Pawn))
+                                break;
                         }
                     }
                 }
