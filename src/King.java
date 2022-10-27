@@ -29,7 +29,7 @@ public class King extends Piece {
                 Piece f1 = Board.pieces[7][5];
                 Piece g1 = Board.pieces[7][6];
                 Piece h1 = Board.pieces[7][7];
-                if (d1 instanceof EmptySquare && c1 instanceof EmptySquare && b1 instanceof EmptySquare && a1 instanceof Rook && a1.white && !this.isAttackedByBlack() && !d1.isAttackedByBlack() && !c1.isAttackedByBlack() && !b1.isAttackedByBlack() && this.queenCastleRights) {
+                if (d1 instanceof EmptySquare && c1 instanceof EmptySquare && b1 instanceof EmptySquare && a1 instanceof Rook && a1.white && !this.isAttackedByBlack() && !d1.isAttackedByBlack() && !c1.isAttackedByBlack() && this.queenCastleRights) {
                     list.add(new Move(this, c1));
                 }
                 if (f1 instanceof EmptySquare && g1 instanceof EmptySquare && h1 instanceof Rook && h1.white && !this.isAttackedByBlack() && !f1.isAttackedByBlack() && !g1.isAttackedByBlack() && this.kingCastleRights) {
@@ -43,7 +43,7 @@ public class King extends Piece {
                 Piece f8 = Board.pieces[0][5];
                 Piece g8 = Board.pieces[0][6];
                 Piece h8 = Board.pieces[0][7];
-                if (d8 instanceof EmptySquare && c8 instanceof EmptySquare && b8 instanceof EmptySquare && a8 instanceof Rook && !a8.white && !this.isAttackedByWhite() && !d8.isAttackedByWhite() && !c8.isAttackedByWhite() && !b8.isAttackedByWhite() && this.queenCastleRights) {
+                if (d8 instanceof EmptySquare && c8 instanceof EmptySquare && b8 instanceof EmptySquare && a8 instanceof Rook && !a8.white && !this.isAttackedByWhite() && !d8.isAttackedByWhite() && !c8.isAttackedByWhite() && this.queenCastleRights) {
                     list.add(new Move(this, c8));
                 }
                 if (f8 instanceof EmptySquare && g8 instanceof EmptySquare && h8 instanceof Rook && !h8.white && !this.isAttackedByWhite() && !f8.isAttackedByWhite() && !g8.isAttackedByWhite() && this.kingCastleRights) {

@@ -19,19 +19,19 @@ public class Pawn extends Piece {
         }
 
         //en passant left white
-        if (this.white && this.clocation != 0 && Board.pieces[rlocation-1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation-1]).enPassant && vaildateEP()) {
+        if (this.white && this.clocation != 0 && Board.pieces[rlocation-1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation-1]) == Board.enPassantPiece && vaildateEP()) {
             list.add(new Move(this, Board.pieces[rlocation-1][clocation-1]));
         }
         //en passant right white
-        if (this.white && this.clocation != 7 && Board.pieces[rlocation-1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation+1]).enPassant && vaildateEP()) {
+        if (this.white && this.clocation != 7 && Board.pieces[rlocation-1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation-1][clocation+1]) == Board.enPassantPiece && vaildateEP()) {
             list.add(new Move(this, Board.pieces[rlocation-1][clocation+1]));
         }
         //en passant left black
-        if (!this.white && this.clocation != 0 && Board.pieces[rlocation+1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation-1]).enPassant && vaildateEP()) {
+        if (!this.white && this.clocation != 0 && Board.pieces[rlocation+1][clocation-1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation-1]) == Board.enPassantPiece && vaildateEP()) {
             list.add(new Move(this, Board.pieces[rlocation+1][clocation-1]));
         }
         //en passant right black
-        if (!this.white && this.clocation != 7 && Board.pieces[rlocation+1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation+1]).enPassant && vaildateEP()) {
+        if (!this.white && this.clocation != 7 && Board.pieces[rlocation+1][clocation+1] instanceof EmptySquare && this.white == Board.whiteTurn && ((EmptySquare)Board.pieces[rlocation+1][clocation+1]) == Board.enPassantPiece && vaildateEP()) {
             list.add(new Move(this, Board.pieces[rlocation+1][clocation+1]));
         }
         if (this.white) {
@@ -131,12 +131,14 @@ public class Pawn extends Piece {
                 Piece aheadByOne = Board.pieces[rlocation-1][clocation];
                 if (this.rlocation == 6 && aheadByOne instanceof EmptySquare && Board.pieces[rlocation-2][clocation] instanceof EmptySquare)
                     list.add(new Move(this, Board.pieces[rlocation-2][clocation]));
-                list.add(new Move(this, aheadByOne));
+                if (aheadByOne instanceof EmptySquare)
+                    list.add(new Move(this, aheadByOne));
             } else {
                 Piece aheadByOne = Board.pieces[rlocation+1][clocation];
                 if (this.rlocation == 1 && aheadByOne instanceof EmptySquare & Board.pieces[rlocation+2][clocation] instanceof EmptySquare)
                     list.add(new Move(this, Board.pieces[rlocation+2][clocation]));
-                list.add(new Move(this, aheadByOne));
+                if (aheadByOne instanceof EmptySquare)
+                    list.add(new Move(this, aheadByOne));
             }
         }
         if (cdif*rdif > 0) {
@@ -184,6 +186,7 @@ public class Pawn extends Piece {
     }
 
     public boolean vaildateEP() {
+        //horizontal pin
         ArrayList<String> whiteInvalid = new ArrayList<>(List.of("KpPq", "KpPr", "KPpq", "KPpr", "qpPK", "rpPK", "qPpK", "rPpK"));
         ArrayList<String> blackInvalid = new ArrayList<>(List.of("kPpQ", "kPpR", "kpPQ", "kpPR", "QPpk", "RPpk", "QpPk", "RpPk"));
         String fen = "";

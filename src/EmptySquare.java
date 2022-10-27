@@ -18,6 +18,8 @@ public class EmptySquare extends Piece {
         return list;
     }
     public EmptySquare clonePiece() {
-        return new EmptySquare(this.rlocation, this.clocation);
+        EmptySquare es = new EmptySquare(this.rlocation, this.clocation);
+        es.enPassant = this.enPassant;
+        return es;
     }
 }

@@ -18,6 +18,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     
     public static King whiteKing;
     public static King blackKing;
+    public static EmptySquare enPassantPiece;
     public static boolean whiteTurn = true;
     public static Piece[][] pieces;
     private static Engine engine;
@@ -96,9 +97,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             originalPanel.setBackground(darkCover);
         currentPiece = componentToPiece(currentPanel);
         currentMoves = currentPiece.getLegalMoves();
-        // System.out.println(currentPiece);
-        // System.out.println(currentMoves);
-        // System.out.println(currentPiece.isPinned());
+        System.out.println(currentPiece);
+        System.out.println(currentMoves);
     }
 
     public void mouseDragged(MouseEvent me) {
@@ -230,16 +230,18 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             return;
         }
         //reset passant
-        if (getPassantPiece() != null) {
-            getPassantPiece().enPassant = false;
+        if (enPassantPiece != null) {
+            enPassantPiece.enPassant = false;
+            enPassantPiece = null;
         }
         //double pawn push passant flag
         if (movingPiece instanceof Pawn && Math.abs(movingPiece.getR() - destination.getR()) == 2) {
             if (whiteTurn) {
-                ((EmptySquare)pieces[destination.getR()+1][destination.getC()]).enPassant = true;
+                enPassantPiece = ((EmptySquare)pieces[destination.getR()+1][destination.getC()]);
             } else {
-                ((EmptySquare)pieces[destination.getR()-1][destination.getC()]).enPassant = true;
+                enPassantPiece = ((EmptySquare)pieces[destination.getR()-1][destination.getC()]);
             }
+            enPassantPiece.enPassant = true;
         }
         //remove castle rights
         if (movingPiece instanceof King) {
@@ -348,32 +350,34 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (movingPiece instanceof Pawn && destination instanceof EmptySquare && movingPiece.getC() != destination.getC()) {
             //mark move as capture because movePiece() will not do it for us
             moveIsCapture = true;
-            //pawn movement
-            pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
-            pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
-            movingPiece.setLocation(destination.getR(), destination.getC());
             Pawn passantPiece;
             if (whiteTurn) {
                 passantPiece = (Pawn)pieces[destination.getR()+1][destination.getC()];
             } else {
                 passantPiece = (Pawn)pieces[destination.getR()-1][destination.getC()];
             }
+            //pawn movement
+            pieces[destination.getR()][destination.getC()] = pieces[movingPiece.getR()][movingPiece.getC()];
+            pieces[movingPiece.getR()][movingPiece.getC()] = new EmptySquare(movingPiece.getR(), movingPiece.getC());
+            movingPiece.setLocation(destination.getR(), destination.getC());
             //set EP piece to empty square
             Board.pieces[passantPiece.getR()][passantPiece.getC()] = new EmptySquare(passantPiece.getR(), passantPiece.getC());
             ((EmptySquare)destination).enPassant = false;
             return;
         }
         //reset passant
-        if (getPassantPiece() != null) {
-            getPassantPiece().enPassant = false;
+        if (enPassantPiece != null) {
+            enPassantPiece.enPassant = false;
+            enPassantPiece = null;
         }
         //double pawn push passant flag
         if (movingPiece instanceof Pawn && Math.abs(movingPiece.getR() - destination.getR()) == 2) {
             if (whiteTurn) {
-                ((EmptySquare)pieces[destination.getR()+1][destination.getC()]).enPassant = true;
+                enPassantPiece = ((EmptySquare)pieces[destination.getR()+1][destination.getC()]);
             } else {
-                ((EmptySquare)pieces[destination.getR()-1][destination.getC()]).enPassant = true;
+                enPassantPiece = ((EmptySquare)pieces[destination.getR()-1][destination.getC()]);
             }
+            enPassantPiece.enPassant = true;
         }
         //remove castle rights
         if (movingPiece instanceof King) {
@@ -652,7 +656,11 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void APIMove(Move move) {
-        previousGamestates.push(new Gamestate(whiteTurn, repeatMap, halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights));
+        boolean value = false;
+        if (enPassantPiece != null) {
+            value = enPassantPiece.enPassant;
+        }
+        previousGamestates.push(new Gamestate(whiteTurn, repeatMap, halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights, enPassantPiece, value));
         APImovePiece(move);
         whiteTurn = !whiteTurn;
     }
@@ -661,16 +669,15 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         Gamestate g = previousGamestates.pop();
         Piece movingPiece = move.startingPiece;
         Piece destination = move.endingPiece;
-
-        if (movingPiece instanceof King && Math.abs(movingPiece.getR() - destination.getR()) == 2) {
+        if (clone.startingPiece instanceof King && Math.abs(clone.startingPiece.getC() - clone.endingPiece.getC()) > 1) {
             //last move was a castle
-            int row = movingPiece.rlocation;
+            int row = movingPiece.rlocation;;
             if (clone.endingPiece.getC() == 6) {
                 //king side
                 //rook
                 pieces[row][7] = pieces[row][5];
                 pieces[row][7].setLocation(row, 7);
-                //king
+                // king
                 pieces[row][4] = pieces[row][6];
                 pieces[row][4].setLocation(row, 4);
                 //empty king and rook orig squares
@@ -688,7 +695,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 pieces[row][2] = new EmptySquare(row, 2);
                 pieces[row][3] = new EmptySquare(row, 3);
             }
-        } else if (movingPiece instanceof Pawn && destination instanceof EmptySquare && Math.abs(destination.getC()-movingPiece.getC()) != 0) {
+        } else if (clone.startingPiece instanceof Pawn && clone.endingPiece instanceof EmptySquare && Math.abs(clone.startingPiece.getC()-clone.endingPiece.getC()) != 0) {
             movingPiece.rlocation = clone.startingPiece.rlocation;
             movingPiece.clocation = clone.startingPiece.clocation;
             destination.rlocation = clone.endingPiece.rlocation;
@@ -717,6 +724,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         whiteKing.queenCastleRights = g.WQC;
         blackKing.kingCastleRights = g.BKC;
         blackKing.queenCastleRights = g.BQC;
+        enPassantPiece = g.EP;
+        if (enPassantPiece != null) {
+            enPassantPiece.enPassant = g.EPValue;
+        }
     }
 
     public static String pieceToCoords(Piece p) {
@@ -880,6 +891,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (!EPSquare.equals("- ")) {
             EmptySquare epPiece = (EmptySquare)coordsToPiece(EPSquare, pieces);
             epPiece.enPassant = true;
+            enPassantPiece = epPiece;
         }
         FENString = FENString.substring(FENString.indexOf(" ")+1);
         Board.halfMoveCount = Integer.parseInt(FENString.substring(0, FENString.indexOf(" ")));
@@ -911,18 +923,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             }
         }
         return totalMoves;
-    }
-
-    public EmptySquare getPassantPiece() {
-        for (int i = 0; i < pieces.length; i++) {
-            for (int j = 0; j < pieces[0].length; j++) {
-                Piece p = pieces[i][j];
-                if (p instanceof EmptySquare && ((EmptySquare)p).enPassant) {
-                    return (EmptySquare)p;
-                }
-            }
-        }
-        return null;
     }
 
     public String getCastlingRights() {
@@ -985,7 +985,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             fen += "- ";
         }
         
-        EmptySquare e = getPassantPiece();
+        EmptySquare e = enPassantPiece;
         if (e == null) {
             fen += "- ";
         } else {
