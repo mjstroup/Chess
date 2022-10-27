@@ -7,6 +7,7 @@ public class Main {
     public static void main(String[] args) {
         // Engine e = new Engine();
         Board b = new Board(Piece.defaultFEN, null);
+        // Board b = new Board("rnbqkbnr/1ppp1ppp/8/p3p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 1", null);
 
         b.pack();
         b.setResizable(false);
@@ -14,7 +15,7 @@ public class Main {
         b.setVisible(true);
         
         
-        // runGeneration(b, 5);
+        runGeneration(b, 5);
     }
 
     public static void runGeneration(Board b, int depth) {
@@ -28,12 +29,13 @@ public class Main {
     }
 
     public static int moveGeneration(Board b, int depth) {
-        if (depth == 0) {
-            return 1;
-        }
-
         int positions = 0;
         ArrayList<Move> moves = b.getAllTurnMoves();
+
+        if (depth == 1) {
+            return moves.size();
+        }
+
         for (Move m : moves) {
             Move clone = new Move(m.startingPiece.clonePiece(), m.endingPiece.clonePiece(), m.promCharacter);
             b.APIMove(m);

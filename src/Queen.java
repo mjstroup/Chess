@@ -25,25 +25,21 @@ public class Queen extends Piece {
 
     @Override
     public ArrayList<Move> getPinnedMoves() {
-        ArrayList<Move> list = new ArrayList<>();
-        ArrayList<Move> tempList = new Rook(this.white, this.rlocation, this.clocation).getPinnedMoves();
-        tempList.addAll(new Bishop(this.white, this.rlocation, this.clocation).getPinnedMoves());
-        for (Move m : tempList) {
+        ArrayList<Move> list = new Rook(this.white, this.rlocation, this.clocation).getPinnedMoves();
+        list.addAll(new Bishop(this.white, this.rlocation, this.clocation).getPinnedMoves());
+        for (Move m : list) {
             m.startingPiece = this;
         }
-        list.addAll(tempList);
         return list;
     }
 
     @Override
     public ArrayList<Move> getAttackingMoves() {
-        ArrayList<Move> list = new ArrayList<>();
-        ArrayList<Move> tempList = new Rook(this.white, this.rlocation, this.clocation).getAttackingMoves();
-        tempList.addAll(new Bishop(this.white, this.rlocation, this.clocation).getAttackingMoves());
-        for (Move m : tempList) {
+        ArrayList<Move> list = new Rook(this.white, this.rlocation, this.clocation).getAttackingMoves();
+        list.addAll(new Bishop(this.white, this.rlocation, this.clocation).getAttackingMoves());
+        for (Move m : list) {
             m.startingPiece = this;
         }
-        list.addAll(tempList);
         return list;
     }
 

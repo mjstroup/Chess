@@ -583,32 +583,16 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             }
         }
         //checkmate check
-        boolean checkmate = true;
-        boolean stalemate = false;
-        for (int i = 0; i < pieces.length; i++) {
-            for (int j = 0; j < pieces[0].length; j++) {
-                Piece p = pieces[i][j];
-                if (p.white != movingPiece.white && p.getLegalMoves().size() != 0) {
-                    checkmate = false;
-                    stalemate = false;
-                }
-                if (p.white != movingPiece.white && p instanceof King)
-                    if (p.white && !p.isAttackedByBlack())
-                        stalemate = true;
-                    else if (!p.isAttackedByWhite())
-                        stalemate = true;
-            }
-        }
-        if (checkmate && stalemate) {
-            //stalemate
-            dispose();
-            System.out.println("Stalemate.");
-            System.exit(0);
-        } else if (checkmate) {
+        if ((whiteTurn && getAllTurnMoves().size() == 0 && whiteKing.isAttackedByBlack()) || (!whiteTurn && getAllTurnMoves().size() == 0 && blackKing.isAttackedByWhite())) {
             //checkmate
             dispose();
             String winner = whiteTurn ? "black" : "white";
             System.out.println("Checkmate for " + winner + ".");
+            System.exit(0);
+        } else if ((whiteTurn && getAllTurnMoves().size() == 0 && !whiteKing.isAttackedByBlack()) || (!whiteTurn && getAllTurnMoves().size() == 0 && !blackKing.isAttackedByWhite())) {
+            //stalemate
+            dispose();
+            System.out.println("Stalemate.");
             System.exit(0);
         }
     }
@@ -910,6 +894,14 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public ArrayList<Move> getAllTurnMoves() {
         return getAllMoves(whiteTurn);
+    }
+
+    public boolean turnInCheck() {
+        if (whiteTurn) {
+            return whiteKing.isAttackedByBlack();
+        } else {
+            return blackKing.isAttackedByWhite();
+        }
     }
 
     public ArrayList<Move> getAllMoves(boolean white) {

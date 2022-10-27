@@ -48,6 +48,7 @@ public class Piece {
                 for (Move m : Board.pieces[i][j].getAttackingMoves()) {
                     if (m.endingPiece == this) {
                         list.add(m.startingPiece);
+                        break;
                     }
                 }
             }
@@ -77,6 +78,7 @@ public class Piece {
                 for (Move m : Board.pieces[i][j].getAttackingMoves()) {
                     if (m.endingPiece == this) {
                         list.add(m.startingPiece);
+                        break;
                     }
                 }
             }
