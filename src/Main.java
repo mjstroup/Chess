@@ -6,14 +6,12 @@ import java.time.temporal.ChronoUnit;
 public class Main {
     public static void main(String[] args) {
         // Engine e = new Engine();
-        Board b = new Board(Piece.defaultFEN, null);
-        // Board b = new Board("rnbqkbnr/1ppp1ppp/8/p3p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 1", null);
+        Board b = new Board(Piece.defaultFEN);
 
         b.pack();
         b.setResizable(false);
         b.setLocationRelativeTo(null);
         b.setVisible(true);
-        
         
         runGeneration(b, 5);
     }

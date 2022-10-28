@@ -26,66 +26,6 @@ public class Piece {
         this.clocation = y;
     }
 
-    public boolean isAttackedByWhite() {
-        for (int i = 0; i < Board.pieces.length; i++) {
-            for (int j = 0; j < Board.pieces[0].length; j++) {
-                if (!Board.pieces[i][j].white) continue;
-                for (Move m : Board.pieces[i][j].getAttackingMoves()) {
-                    if (m.endingPiece == this) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public ArrayList<Piece> attackedByWhiteList() {
-        ArrayList<Piece> list = new ArrayList<>();
-        for (int i = 0; i < Board.pieces.length; i++) {
-            for (int j = 0; j < Board.pieces[0].length; j++) {
-                if (!Board.pieces[i][j].white) continue;
-                for (Move m : Board.pieces[i][j].getAttackingMoves()) {
-                    if (m.endingPiece == this) {
-                        list.add(m.startingPiece);
-                        break;
-                    }
-                }
-            }
-        }
-        return list;
-    }
-
-    public boolean isAttackedByBlack() {
-        for (int i = 0; i < Board.pieces.length; i++) {
-            for (int j = 0; j < Board.pieces[0].length; j++) {
-                if (Board.pieces[i][j].white) continue;
-                for (Move m : Board.pieces[i][j].getAttackingMoves()) {
-                    if (m.endingPiece == this) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public ArrayList<Piece> attackedByBlackList() {
-        ArrayList<Piece> list = new ArrayList<>();
-        for (int i = 0; i < Board.pieces.length; i++) {
-            for (int j = 0; j < Board.pieces[0].length; j++) {
-                if (Board.pieces[i][j].white) continue;
-                for (Move m : Board.pieces[i][j].getAttackingMoves()) {
-                    if (m.endingPiece == this) {
-                        list.add(m.startingPiece);
-                        break;
-                    }
-                }
-            }
-        }
-        return list;
-    }
-
     public ArrayList<Move> getLegalMoves() {
         ArrayList<Move> list = new ArrayList<>();
         boolean singleCheck;
@@ -95,7 +35,6 @@ public class Piece {
             piecesAttackingOurKing = Board.whiteKing.attackedByBlackList();
         else
             piecesAttackingOurKing = Board.blackKing.attackedByWhiteList();
-
         int attackers = piecesAttackingOurKing.size();
         switch (attackers) {
             case 0 -> {
@@ -207,6 +146,348 @@ public class Piece {
             list.addAll(this.getPossibleMoves());
         }
         return list;
+    }
+
+    public boolean isAttackedByWhite() {
+        return attackedBy(true);
+    }
+
+    public boolean isAttackedByBlack() {
+        return attackedBy(false);
+    }
+
+    public ArrayList<Piece> attackedByWhiteList() {
+        return attackedByList(true);
+    }
+
+    public ArrayList<Piece> attackedByBlackList() {
+        return attackedByList(false);
+    }
+
+    public ArrayList<Piece> attackedByList(boolean white) {
+        ArrayList<Piece> list = new ArrayList<>();
+        //look at knight squraes
+        int r = rlocation-1;
+        int c = clocation+2;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white) {
+            list.add(Board.pieces[r][c]);
+        }
+        r = rlocation-2;
+        c = clocation+1;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            list.add(Board.pieces[r][c]);
+        r = rlocation-2;
+        c = clocation-1;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            list.add(Board.pieces[r][c]);
+        r = rlocation-1;
+        c = clocation-2;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            list.add(Board.pieces[r][c]);
+        r = rlocation+1;
+        c = clocation-2;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            list.add(Board.pieces[r][c]);
+        r = rlocation+2;
+        c = clocation-1;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            list.add(Board.pieces[r][c]);
+        r = rlocation+2;
+        c = clocation+1;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            list.add(Board.pieces[r][c]);
+        r = rlocation+1;
+        c = clocation+2;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            list.add(Board.pieces[r][c]);
+        
+        //check pawn squares
+        int offset = white ? 1 : -1;
+        if (rlocation+offset >= 0 && rlocation+offset <= 7 && clocation-1 >= 0 && Board.pieces[rlocation+offset][clocation-1] instanceof Pawn && Board.pieces[rlocation+offset][clocation-1].white == white) {
+            list.add(Board.pieces[rlocation+offset][clocation-1]);
+        }
+        if (rlocation+offset >= 0 && rlocation+offset <= 7 && clocation+1 <= 7 && Board.pieces[rlocation+offset][clocation+1] instanceof Pawn && Board.pieces[rlocation+offset][clocation+1].white == white) {
+            list.add(Board.pieces[rlocation+offset][clocation+1]);
+        }
+        
+        //check king squares
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                int r2 = rlocation + i;
+                int c2 = clocation + j;
+                if (r2 <= 7 && r2 >= 0 && c2 <= 7 && c2 >= 0 && Board.pieces[r2][c2] instanceof King && Board.pieces[r2][c2].white == white)
+                    list.add(Board.pieces[r2][c2]);
+            }
+        }
+
+        //check sliding pieces
+        boolean left = true, up = true, right = true, down = true, topLeft = true, topRight = true, bottomLeft = true, bottomRight = true;
+        for (int i = 1; i < 8; i++) {
+            if (!(left || up || right || down || topLeft || topRight || bottomLeft || bottomRight)) break;
+            if (left) {
+                Piece p = null;
+                if (clocation-i <= 7 && clocation-i >= 0) 
+                    p = Board.pieces[rlocation][clocation-i];
+                if (!(clocation-i <= 7 && clocation-i >= 0)) {
+                    left = false;
+                } else if ((p instanceof Rook || p instanceof Queen) && p.white == white) {
+                    list.add(p);
+                    left = false;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    left = false;
+                }
+            }
+            if (up) {
+                Piece p = null;
+                if (rlocation-i <= 7 && rlocation-i >= 0) 
+                    p = Board.pieces[rlocation-i][clocation];
+                if (!(rlocation-i <= 7 && rlocation-i >= 0)) {
+                    up = false;
+                } else if ((p instanceof Rook || p instanceof Queen) && p.white == white) {
+                    list.add(p);
+                    up = false;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    up = false;
+                }
+            }
+            if (right) {
+                Piece p = null;
+                if (clocation+i <= 7 && clocation+i >= 0) 
+                    p = Board.pieces[rlocation][clocation+i];
+                if (!(clocation+i <= 7 && clocation+i >= 0)) {
+                    right = false;
+                } else if ((p instanceof Rook || p instanceof Queen) && p.white == white) {
+                    list.add(p);
+                    right = false;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    right = false;
+                }
+            }
+            if (down) {
+                Piece p = null;
+                if (rlocation+i <= 7 && rlocation+i >= 0) 
+                    p = Board.pieces[rlocation+i][clocation];
+                if (!(rlocation+i <= 7 && rlocation+i >= 0)) {
+                    down = false;
+                } else if ((p instanceof Rook || p instanceof Queen) && p.white == white) {
+                    list.add(p);
+                    down = false;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    down = false;
+                }
+            }
+            if (topLeft) {
+                Piece p = null;
+                if (rlocation-i >= 0 && rlocation-i <= 7 && clocation-i >= 0 && clocation-i <= 7)
+                    p = Board.pieces[rlocation-i][clocation-i];
+                if (!(rlocation-i >= 0 && rlocation-i <= 7 && clocation-i >= 0 && clocation-i <= 7)) {
+                    topLeft = false;
+                } else if ((p instanceof Bishop || p instanceof Queen) && p.white == white) {
+                    list.add(p);
+                    topLeft = false;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    topLeft = false;
+                }
+            }
+            if (topRight) {
+                Piece p = null;
+                if (rlocation-i >= 0 && rlocation-i <= 7 && clocation+i >= 0 && clocation+i <= 7)
+                    p = Board.pieces[rlocation-i][clocation+i];
+                if (!(rlocation-i >= 0 && rlocation-i <= 7 && clocation+i >= 0 && clocation+i <= 7)) {
+                    topRight = false;
+                } else if ((p instanceof Bishop || p instanceof Queen) && p.white == white) {
+                    list.add(p);
+                    topRight = false;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    topRight = false;
+                }
+            }
+            if (bottomLeft) {
+                Piece p = null;
+                if (rlocation+i >= 0 && rlocation+i <= 7 && clocation-i >= 0 && clocation-i <= 7)
+                    p = Board.pieces[rlocation+i][clocation-i];
+                if (!(rlocation+i >= 0 && rlocation+i <= 7 && clocation-i >= 0 && clocation-i <= 7)) {
+                    bottomLeft = false;
+                } else if ((p instanceof Bishop || p instanceof Queen) && p.white == white) {
+                    list.add(p);
+                    bottomLeft = false;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    bottomLeft = false;
+                }
+            }
+            if (bottomRight) {
+                Piece p = null;
+                if (rlocation+i >= 0 && rlocation+i <= 7 && clocation+i >= 0 && clocation+i <= 7)
+                    p = Board.pieces[rlocation+i][clocation+i];
+                if (!(rlocation+i >= 0 && rlocation+i <= 7 && clocation+i >= 0 && clocation+i <= 7)) {
+                    bottomRight = false;
+                } else if ((p instanceof Bishop || p instanceof Queen) && p.white == white) {
+                    list.add(p);
+                    bottomRight = false;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    bottomRight = false;
+                }
+            }
+        }
+        return list;
+    }
+
+    public boolean attackedBy(boolean white) {
+        //look at knight squraes
+        int r = rlocation-1;
+        int c = clocation+2;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            return true;
+        r = rlocation-2;
+        c = clocation+1;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            return true;
+        r = rlocation-2;
+        c = clocation-1;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            return true;
+        r = rlocation-1;
+        c = clocation-2;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            return true;
+        r = rlocation+1;
+        c = clocation-2;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            return true;
+        r = rlocation+2;
+        c = clocation-1;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            return true;
+        r = rlocation+2;
+        c = clocation+1;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            return true;
+        r = rlocation+1;
+        c = clocation+2;
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && Board.pieces[r][c] instanceof Knight && Board.pieces[r][c].white == white)
+            return true;
+        
+        //check pawn squares
+        int offset = white ? 1 : -1;
+        if (rlocation+offset >= 0 && rlocation+offset <= 7 && clocation-1 >= 0 && Board.pieces[rlocation+offset][clocation-1] instanceof Pawn && Board.pieces[rlocation+offset][clocation-1].white == white) {
+            return true;
+        }
+        if (rlocation+offset >= 0 && rlocation+offset <= 7 && clocation+1 <= 7 && Board.pieces[rlocation+offset][clocation+1] instanceof Pawn && Board.pieces[rlocation+offset][clocation+1].white == white) {
+            return true;
+        }
+        
+        //check king squares
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                int r2 = rlocation + i;
+                int c2 = clocation + j;
+                if (r2 <= 7 && r2 >= 0 && c2 <= 7 && c2 >= 0 && Board.pieces[r2][c2] instanceof King && Board.pieces[r2][c2].white == white)
+                    return true;
+            }
+        }
+
+        //check sliding pieces
+        boolean left = true, up = true, right = true, down = true, topLeft = true, topRight = true, bottomLeft = true, bottomRight = true;
+        for (int i = 1; i < 8; i++) {
+            if (!(left || up || right || down || topLeft || topRight || bottomLeft || bottomRight)) break;
+            if (left) {
+                Piece p = null;
+                if (clocation-i <= 7 && clocation-i >= 0) 
+                    p = Board.pieces[rlocation][clocation-i];
+                if (!(clocation-i <= 7 && clocation-i >= 0)) {
+                    left = false;
+                } else if ((p instanceof Rook || p instanceof Queen) && p.white == white) {
+                    return true;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    left = false;
+                }
+            }
+            if (up) {
+                Piece p = null;
+                if (rlocation-i <= 7 && rlocation-i >= 0) 
+                    p = Board.pieces[rlocation-i][clocation];
+                if (!(rlocation-i <= 7 && rlocation-i >= 0)) {
+                    up = false;
+                } else if ((p instanceof Rook || p instanceof Queen) && p.white == white) {
+                    return true;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    up = false;
+                }
+            }
+            if (right) {
+                Piece p = null;
+                if (clocation+i <= 7 && clocation+i >= 0) 
+                    p = Board.pieces[rlocation][clocation+i];
+                if (!(clocation+i <= 7 && clocation+i >= 0)) {
+                    right = false;
+                } else if ((p instanceof Rook || p instanceof Queen) && p.white == white) {
+                    return true;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    right = false;
+                }
+            }
+            if (down) {
+                Piece p = null;
+                if (rlocation+i <= 7 && rlocation+i >= 0) 
+                    p = Board.pieces[rlocation+i][clocation];
+                if (!(rlocation+i <= 7 && rlocation+i >= 0)) {
+                    down = false;
+                } else if ((p instanceof Rook || p instanceof Queen) && p.white == white) {
+                    return true;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    down = false;
+                }
+            }
+            if (topLeft) {
+                Piece p = null;
+                if (rlocation-i >= 0 && rlocation-i <= 7 && clocation-i >= 0 && clocation-i <= 7)
+                    p = Board.pieces[rlocation-i][clocation-i];
+                if (!(rlocation-i >= 0 && rlocation-i <= 7 && clocation-i >= 0 && clocation-i <= 7)) {
+                    topLeft = false;
+                } else if ((p instanceof Bishop || p instanceof Queen) && p.white == white) {
+                    return true;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    topLeft = false;
+                }
+            }
+            if (topRight) {
+                Piece p = null;
+                if (rlocation-i >= 0 && rlocation-i <= 7 && clocation+i >= 0 && clocation+i <= 7)
+                    p = Board.pieces[rlocation-i][clocation+i];
+                if (!(rlocation-i >= 0 && rlocation-i <= 7 && clocation+i >= 0 && clocation+i <= 7)) {
+                    topRight = false;
+                } else if ((p instanceof Bishop || p instanceof Queen) && p.white == white) {
+                    return true;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    topRight = false;
+                }
+            }
+            if (bottomLeft) {
+                Piece p = null;
+                if (rlocation+i >= 0 && rlocation+i <= 7 && clocation-i >= 0 && clocation-i <= 7)
+                    p = Board.pieces[rlocation+i][clocation-i];
+                if (!(rlocation+i >= 0 && rlocation+i <= 7 && clocation-i >= 0 && clocation-i <= 7)) {
+                    bottomLeft = false;
+                } else if ((p instanceof Bishop || p instanceof Queen) && p.white == white) {
+                    return true;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    bottomLeft = false;
+                }
+            }
+            if (bottomRight) {
+                Piece p = null;
+                if (rlocation+i >= 0 && rlocation+i <= 7 && clocation+i >= 0 && clocation+i <= 7)
+                    p = Board.pieces[rlocation+i][clocation+i];
+                if (!(rlocation+i >= 0 && rlocation+i <= 7 && clocation+i >= 0 && clocation+i <= 7)) {
+                    bottomRight = false;
+                } else if ((p instanceof Bishop || p instanceof Queen) && p.white == white) {
+                    return true;
+                } else if (!(p instanceof EmptySquare) && !(p instanceof King && p.white != white)) {
+                    bottomRight = false;
+                }
+            }
+        }
+        return false;
     }
 
     public Piece isPinned() {

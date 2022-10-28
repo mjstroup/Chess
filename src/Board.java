@@ -38,7 +38,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private JLabel piece;
     private boolean moveIsCapture = false;
     private Stack<Gamestate> previousGamestates;
-
+    
+    public Board(String FENString) {
+        this(FENString, null);
+    }
     public Board(String FENString, Engine e) {
         engine = e;
         repeatMap = new HashMap<>();
@@ -644,7 +647,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (enPassantPiece != null) {
             value = enPassantPiece.enPassant;
         }
-        previousGamestates.push(new Gamestate(whiteTurn, repeatMap, halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights, enPassantPiece, value));
+        previousGamestates.push(new Gamestate(whiteTurn, repeatMap, halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights, enPassantPiece, value, moveIsCapture));
         APImovePiece(move);
         whiteTurn = !whiteTurn;
     }
@@ -709,6 +712,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         blackKing.kingCastleRights = g.BKC;
         blackKing.queenCastleRights = g.BQC;
         enPassantPiece = g.EP;
+        moveIsCapture = g.moveIsCapture;
         if (enPassantPiece != null) {
             enPassantPiece.enPassant = g.EPValue;
         }

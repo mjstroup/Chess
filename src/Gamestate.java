@@ -13,7 +13,8 @@ public class Gamestate {
     boolean BQC;
     EmptySquare EP;
     boolean EPValue;
-    public Gamestate(boolean whiteTurn, HashMap<String, Integer> repeatMap, int halfMoveCount, int fullMoveCount, boolean WKC, boolean WQC, boolean BKC, boolean BQC, EmptySquare EP, boolean EPValue) {
+    boolean moveIsCapture;
+    public Gamestate(boolean whiteTurn, HashMap<String, Integer> repeatMap, int halfMoveCount, int fullMoveCount, boolean WKC, boolean WQC, boolean BKC, boolean BQC, EmptySquare EP, boolean EPValue, boolean moveIsCapture) {
         this.whiteTurn = whiteTurn;
         this.repeatMap = repeatMap;
         this.halfMoveCount = halfMoveCount;
@@ -24,5 +25,6 @@ public class Gamestate {
         this.BQC = BQC; 
         this.EP = EP;
         this.EPValue = EPValue;
+        this.moveIsCapture = moveIsCapture;
     }
 }
