@@ -6,6 +6,10 @@ public class Knight extends Piece {
         this.clocation = clocation;
         this.white = white;
         this.abbreviation = 'n';
+        if (white)
+            this.value = 3;
+        else
+            this.value = -3;
         fileName = this.white ? "./Images/wN.png" : "./Images/bN.png";
     }
 

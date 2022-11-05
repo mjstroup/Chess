@@ -8,6 +8,7 @@ public class King extends Piece {
         this.clocation = clocation;
         this.white = white;
         this.abbreviation = 'k';
+        this.value = 0;
         fileName = this.white ? "./Images/wK.png" : "./Images/bK.png";
     }
 

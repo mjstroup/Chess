@@ -15,4 +15,14 @@ public class Engine {
             b.remoteMove(random);
         }
     }
+    public static int evaluation() {
+        int eval = 0;
+        for (int i = 0; i < Board.pieces.length; i++) {
+            for (int j = 0; j < Board.pieces.length; j++) {
+                Piece p = Board.pieces[i][j];
+                eval += p.value;
+            }
+        }
+        return eval;
+    }
 }

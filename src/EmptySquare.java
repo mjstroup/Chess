@@ -6,6 +6,7 @@ public class EmptySquare extends Piece {
         this.rlocation = rlocation;
         this.clocation = clocation;
         this.abbreviation = 'E';
+        this.value = 0;
     }
     @Override
     public ArrayList<Move> getPossibleMoves() {

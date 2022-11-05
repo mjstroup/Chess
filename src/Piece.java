@@ -12,6 +12,7 @@ public class Piece {
     public ArrayList<Move> getAttackingMoves(){return null;}
     public Piece clonePiece(){return null;}
     public static final String defaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public int value;
 
     public int getR() {
         return this.rlocation;
@@ -550,5 +551,286 @@ public class Piece {
                 return null;
         }
         return null;
+    }
+
+    public ArrayList<Move> getSlidingAttackingMoves() {
+        ArrayList<Move> list = new ArrayList<>();
+        boolean topLeft = true, topRight = true, bottomLeft = true, bottomRight = true, up = true, left = true, right = true, down = true;
+        if (this instanceof Rook) {
+            topRight = false;
+            topLeft = false;
+            bottomLeft = false;
+            bottomRight = false;
+        }
+        if (this instanceof Bishop) {
+            left = false;
+            right = false;
+            down = false;
+            up = false;
+        }
+        for (int i = 1; i < 8; i++) {
+            if (!(left || up || right || down || topLeft || topRight || bottomLeft || bottomRight)) break;
+            if (topLeft) {
+                Piece p = null;
+                if (rlocation-i >= 0 && rlocation-i <= 7 && clocation-i >= 0 && clocation-i <= 7)
+                    p = Board.pieces[rlocation-i][clocation-i];
+                if (!(rlocation-i >= 0 && rlocation-i <= 7 && clocation-i >= 0 && clocation-i <= 7)) {
+                    topLeft = false;
+                } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
+                } else {
+                    list.add(new Move(this, p));
+                    topLeft = false;
+                }
+            }
+            if (topRight) {
+                Piece p = null;
+                if (rlocation-i >= 0 && rlocation-i <= 7 && clocation+i >= 0 && clocation+i <= 7)
+                    p = Board.pieces[rlocation-i][clocation+i];
+                if (!(rlocation-i >= 0 && rlocation-i <= 7 && clocation+i >= 0 && clocation+i <= 7)) {
+                    topRight = false;
+                } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
+                } else {
+                    list.add(new Move(this, p));
+                    topRight = false;
+                }
+            }
+            if (bottomLeft) {
+                Piece p = null;
+                if (rlocation+i >= 0 && rlocation+i <= 7 && clocation-i >= 0 && clocation-i <= 7)
+                    p = Board.pieces[rlocation+i][clocation-i];
+                if (!(rlocation+i >= 0 && rlocation+i <= 7 && clocation-i >= 0 && clocation-i <= 7)) {
+                    bottomLeft = false;
+                } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
+                } else {
+                    list.add(new Move(this, p));
+                    bottomLeft = false;
+                }
+            }
+            if (bottomRight) {
+                Piece p = null;
+                if (rlocation+i >= 0 && rlocation+i <= 7 && clocation+i >= 0 && clocation+i <= 7)
+                    p = Board.pieces[rlocation+i][clocation+i];
+                if (!(rlocation+i >= 0 && rlocation+i <= 7 && clocation+i >= 0 && clocation+i <= 7)) {
+                    bottomRight = false;
+                } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
+                } else {
+                    list.add(new Move(this, p));
+                    bottomRight = false;
+                }
+            }
+            if (left) {
+                Piece p = null;
+                if (clocation-i <= 7 && clocation-i >= 0) 
+                    p = Board.pieces[rlocation][clocation-i];
+                if (!(clocation-i <= 7 && clocation-i >= 0)) {
+                    left = false;
+                } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
+                } else {
+                    list.add(new Move(this, p));
+                    left = false;
+                }
+            }
+            if (up) {
+                Piece p = null;
+                if (rlocation-i <= 7 && rlocation-i >= 0) 
+                    p = Board.pieces[rlocation-i][clocation];
+                if (!(rlocation-i <= 7 && rlocation-i >= 0)) {
+                    up = false;
+                } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
+                } else {
+                    list.add(new Move(this, p));
+                    up = false;
+                }
+            }
+            if (right) {
+                Piece p = null;
+                if (clocation+i <= 7 && clocation+i >= 0) 
+                    p = Board.pieces[rlocation][clocation+i];
+                if (!(clocation+i <= 7 && clocation+i >= 0)) {
+                    right = false;
+                } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
+                } else {
+                    list.add(new Move(this, p));
+                    right = false;
+                }
+            }
+            if (down) {
+                Piece p = null;
+                if (rlocation+i <= 7 && rlocation+i >= 0) 
+                    p = Board.pieces[rlocation+i][clocation];
+                if (!(rlocation+i <= 7 && rlocation+i >= 0)) {
+                    down = false;
+                } else if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white != this.white) {
+                    list.add(new Move(this, p));
+                } else {
+                    list.add(new Move(this, p));
+                    down = false;
+                }
+            }
+        }   
+        return list;
+    }
+    public ArrayList<Move> getSlidingPinnedMoves() {
+        ArrayList<Move> list = new ArrayList<>();
+        Piece attacker = this.isPinned();
+        int rdif = attacker.rlocation - this.rlocation;
+        int cdif = attacker.clocation - this.clocation;
+        boolean topLeft = true, topRight = true, bottomLeft = true, bottomRight = true, left = true, up = true, right = true, down = true;
+        if (this instanceof Rook) {
+            topRight = false;
+            topLeft = false;
+            bottomLeft = false;
+            bottomRight = false;
+        }
+        if (this instanceof Bishop) {
+            left = false;
+            right = false;
+            down = false;
+            up = false;
+        }
+        if (this instanceof Queen) {
+            if (rdif != 0 && cdif != 0) {
+                up = false;
+                down = false;
+                left = false;
+                right = false;
+            } else {
+                topRight = false;
+                topLeft = false;
+                bottomLeft = false;
+                bottomRight = false;
+            }
+        }
+        //rook and queen
+        if (rdif == 0) {
+            up = false;
+            down = false;
+        } else {
+            right = false;
+            left = false;
+        }
+        if (rdif*cdif > 0) {
+            bottomLeft = false;
+            topRight = false;
+        } else {
+            bottomRight = false;
+            topLeft = false;
+        }
+        for (int i = 1; i < 8; i++) {
+            if (!(topLeft || topRight || bottomLeft || bottomRight || up || down || right || left)) break;
+            if (topLeft) {
+                Piece p = Board.pieces[rlocation-i][clocation-i];
+                if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white == this.white) {
+                    topLeft = false;
+                } else if (p == attacker) {
+                    list.add(new Move(this, p));
+                    topLeft = false;
+                }
+            }
+            if (topRight) {
+                Piece p = Board.pieces[rlocation-i][clocation+i];
+                if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white == this.white) {
+                    topRight = false;
+                } else if (p == attacker) {
+                    list.add(new Move(this, p));
+                    topRight = false;
+                }
+            }
+            if (bottomLeft) {
+                Piece p = Board.pieces[rlocation+i][clocation-i];
+                if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white == this.white) {
+                    bottomLeft = false;
+                } else if (p == attacker) {
+                    list.add(new Move(this, p));
+                    bottomLeft = false;
+                }
+            }
+            if (bottomRight) {
+                Piece p = Board.pieces[rlocation+i][clocation+i];
+                if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white == this.white) {
+                    bottomRight = false;
+                } else if (p == attacker) {
+                    list.add(new Move(this, p));
+                    bottomRight = false;
+                }
+            }
+            if (left) {
+                Piece p = Board.pieces[rlocation][clocation-i];
+                if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white == this.white) {
+                    left = false;
+                } else if (p == attacker) {
+                    list.add(new Move(this, p));
+                    left = false;
+                }
+            }
+            if (up) {
+                Piece p = Board.pieces[rlocation-i][clocation];
+                if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white == this.white) {
+                    up = false;
+                } else if (p == attacker) {
+                    list.add(new Move(this, p));
+                    up = false;
+                }
+            }
+            if (right) {
+                Piece p = Board.pieces[rlocation][clocation+i];
+                if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white == this.white) {
+                    right = false;
+                } else if (p == attacker) {
+                    list.add(new Move(this, p));
+                    right = false;
+                }
+            }
+            if (down) {
+                Piece p = Board.pieces[rlocation+i][clocation];
+                if (p instanceof EmptySquare) {
+                    list.add(new Move(this, p));
+                } else if (p instanceof King && p.white == this.white) {
+                    down = false;
+                } else if (p == attacker) {
+                    list.add(new Move(this, p));
+                    down = false;
+                }
+            }
+        }   
+        
+        return list;
     }
 }
