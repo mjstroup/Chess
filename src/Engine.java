@@ -15,7 +15,13 @@ public class Engine {
             b.remoteMove(random);
         }
     }
-    public static int evaluation() {
+    public static int evaluation(Board b) {
+        if (b.turnInCheckMate()) {
+            return Board.whiteTurn ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        }
+        if (b.turnInStaleMate()) {
+            return 0;
+        }
         int eval = 0;
         for (int i = 0; i < Board.pieces.length; i++) {
             for (int j = 0; j < Board.pieces.length; j++) {

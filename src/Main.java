@@ -13,7 +13,7 @@ public class Main {
         b.setLocationRelativeTo(null);
         b.setVisible(true);
         
-        runGeneration(b, 5);
+        // runGeneration(b, 5);
     }
 
     public static void runGeneration(Board b, int depth) {

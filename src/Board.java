@@ -494,6 +494,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         previousMoveCurrentPanel = currentPanel;
         
         whiteTurn = !whiteTurn;
+        System.out.println(Engine.evaluation(this));
         //3 move stalemate
         String fen = this.getFEN();
         fen = fen.substring(0, Board.ordinalIndexOf(fen, " ", 4));
@@ -503,18 +504,12 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             repeatMap.put(fen, 1);
         }
         if (repeatMap.get(fen) == 3) {
-            //stalemate
-            dispose();
-            System.out.println("Stalemate.");
-            System.exit(0);
+            throwStaleMate();
         }
         //stalemate checks
         //50 move rule
         if (halfMoveCount == 100) {
-            //stalemate
-            dispose();
-            System.out.println("Stalemate.");
-            System.exit(0);
+            throwStaleMate();
         }
         //update full move
         if (whiteTurn) {
@@ -536,39 +531,24 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //2 kings
         if (whitePieces.size() == 1 && blackPieces.size() == 1) {
-            //stalemate
-            dispose();
-            System.out.println("Stalemate.");
-            System.exit(0);
+            throwStaleMate();
         }
         //2 kings + bishop or knight
         if ((whitePieces.size() == 1 || blackPieces.size() == 1) && (whitePieces.size() == 2 || blackPieces.size() == 2)) {
             if (blackPieces.size() == 2) {
                 if (blackPieces.get(0) instanceof Bishop || blackPieces.get(1) instanceof Bishop) {
-                    //stalemate
-                    dispose();
-                    System.out.println("Stalemate.");
-                    System.exit(0);
+                    throwStaleMate();
                 }
                 if (blackPieces.get(0) instanceof Knight || blackPieces.get(1) instanceof Knight) {
-                    //stalemate
-                    dispose();
-                    System.out.println("Stalemate.");
-                    System.exit(0);
+                    throwStaleMate();
                 }
             }
             if (whitePieces.size() == 2) {
                 if (whitePieces.get(0) instanceof Bishop || whitePieces.get(1) instanceof Bishop) {
-                    //stalemate
-                    dispose();
-                    System.out.println("Stalemate.");
-                    System.exit(0);
+                    throwStaleMate();
                 }
                 if (whitePieces.get(0) instanceof Knight || whitePieces.get(1) instanceof Knight) {
-                    //stalemate
-                    dispose();
-                    System.out.println("Stalemate.");
-                    System.exit(0);
+                    throwStaleMate();
                 }
             }
         }
@@ -578,25 +558,15 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 Bishop white = whitePieces.get(0) instanceof King ? (Bishop)whitePieces.get(1) : (Bishop)whitePieces.get(0);
                 Bishop black = blackPieces.get(0) instanceof King ? (Bishop)blackPieces.get(1) : (Bishop)blackPieces.get(0);
                 if ((white.getR() + white.getC()) % 2 == (black.getR() + black.getC()) % 2) {
-                    //stalemate
-                    dispose();
-                    System.out.println("Stalemate.");
-                    System.exit(0);
+                    throwStaleMate();
                 }
             }
         }
         //checkmate check
-        if ((whiteTurn && getAllTurnMoves().size() == 0 && whiteKing.isAttackedByBlack()) || (!whiteTurn && getAllTurnMoves().size() == 0 && blackKing.isAttackedByWhite())) {
-            //checkmate
-            dispose();
-            String winner = whiteTurn ? "black" : "white";
-            System.out.println("Checkmate for " + winner + ".");
-            System.exit(0);
-        } else if ((whiteTurn && getAllTurnMoves().size() == 0 && !whiteKing.isAttackedByBlack()) || (!whiteTurn && getAllTurnMoves().size() == 0 && !blackKing.isAttackedByWhite())) {
-            //stalemate
-            dispose();
-            System.out.println("Stalemate.");
-            System.exit(0);
+        if (turnInCheckMate()) {
+            throwCheckMate();
+        } else if (turnInStaleMate()) {
+            throwStaleMate();
         }
     }
 
@@ -906,6 +876,29 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         } else {
             return blackKing.isAttackedByWhite();
         }
+    }
+
+    public boolean turnInCheckMate() {
+        return turnInCheck() && getAllTurnMoves().size() == 0;
+    }
+
+    public boolean turnInStaleMate() {
+        return !turnInCheck() && getAllTurnMoves().size() == 0;
+    }
+
+    public void throwCheckMate() {
+        //checkmate
+        dispose();
+        String winner = whiteTurn ? "black" : "white";
+        System.out.println("Checkmate for " + winner + ".");
+        System.exit(0);
+    }
+
+    public void throwStaleMate() {
+        //stalemate
+        dispose();
+        System.out.println("Stalemate.");
+        System.exit(0);
     }
 
     public ArrayList<Move> getAllMoves(boolean white) {
