@@ -5,8 +5,9 @@ import java.time.temporal.ChronoUnit;
 
 public class Main {
     public static void main(String[] args) {
-        // Engine e = new Engine();
-        Board b = new Board(Piece.defaultFEN);
+        Engine e = new Engine();
+        Board b = new Board(Piece.defaultFEN, e);
+        // Board b = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
 
         b.pack();
         b.setResizable(false);

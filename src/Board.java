@@ -494,7 +494,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         previousMoveCurrentPanel = currentPanel;
         
         whiteTurn = !whiteTurn;
-        System.out.println(Engine.evaluation(this));
         //3 move stalemate
         String fen = this.getFEN();
         fen = fen.substring(0, Board.ordinalIndexOf(fen, " ", 4));

@@ -700,12 +700,18 @@ public class Piece {
         int cdif = attacker.clocation - this.clocation;
         boolean topLeft = true, topRight = true, bottomLeft = true, bottomRight = true, left = true, up = true, right = true, down = true;
         if (this instanceof Rook) {
+            if (rdif*cdif != 0) {
+                return list;
+            }
             topRight = false;
             topLeft = false;
             bottomLeft = false;
             bottomRight = false;
         }
         if (this instanceof Bishop) {
+            if (rdif*cdif == 0) {
+                return list;
+            }
             left = false;
             right = false;
             down = false;
