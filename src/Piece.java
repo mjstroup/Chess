@@ -6,7 +6,6 @@ public class Piece {
     public boolean white;
     public int rlocation;
     public int clocation;
-    public char promotion;
     public ArrayList<Move> getPossibleMoves(){return null;}
     public ArrayList<Move> getPinnedMoves(){return null;}
     public ArrayList<Move> getAttackingMoves(){return null;}
