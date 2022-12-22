@@ -192,6 +192,9 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         //did the move really happen..
         if (!returned) {
             postMove(movingPiece);
+            if (engine != null) {
+                engine.playMove(this, Board.whiteTurn);
+            }
         }
         piece = null;
         currentPiece = null;
@@ -200,9 +203,9 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         currentMoves = null;
         originalPanel = null;
         moveIsCapture = false;
-        if (!returned && engine != null) {
-            engine.playMove(this, Board.whiteTurn);
-        }
+        // if (!returned && engine != null) {
+
+        // }
     }
 
     public void movePiece(Move move) {

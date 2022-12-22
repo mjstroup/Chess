@@ -4,7 +4,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
 public class Engine {
-    private static final int SEARCH_DEPTH = 3;
+    private static final int SEARCH_DEPTH = 4;
     private static Move bestMove;
     public void playMove(Board b, boolean white) {
         LocalTime start = LocalTime.now();
@@ -14,10 +14,9 @@ public class Engine {
         long ms = start.until(end, ChronoUnit.MILLIS);
         System.out.println(String.format("Time: %dms", ms));
     }
-    public static int evaluate(Board board) {
-        //TODO: black does not see checkmate
+    public static int evaluate(Board board, int depth) {
         if (board.turnInCheckMate()) {
-            return -1000000;
+            return -1000000-depth;
         }
         if (board.turnInStaleMate()) {
             return 0;
@@ -34,8 +33,8 @@ public class Engine {
     }
 
     public static int alphaBetaMax(Board board, int alpha, int beta, int depth) {
-        if (depth == 0) {
-            return evaluate(board);
+        if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
+            return evaluate(board, depth);
         }
         for (Move m : board.getAllTurnMoves()) {
             Move clone = new Move(m.startingPiece.clonePiece(), m.endingPiece.clonePiece(), m.promCharacter);
@@ -55,8 +54,8 @@ public class Engine {
     }
 
     public static int alphaBetaMin(Board board, int alpha, int beta, int depth) {
-        if (depth == 0) {
-            return evaluate(board) * -1;
+        if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
+            return evaluate(board, depth) * -1;
         }
         for (Move m : board.getAllTurnMoves()) {
             Move clone = new Move(m.startingPiece.clonePiece(), m.endingPiece.clonePiece(), m.promCharacter);
