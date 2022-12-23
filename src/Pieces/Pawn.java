@@ -1,5 +1,8 @@
-package src;
+package src.Pieces;
 import java.util.*;
+
+import src.Game.Board;
+import src.Game.Move;
 public class Pawn extends Piece {
     public Pawn (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
@@ -10,7 +13,7 @@ public class Pawn extends Piece {
             this.value = 1;
         else
             this.value = -1;
-        fileName = this.white ? "./Images/wP.png" : "./Images/bP.png";
+        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wP.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bP.png";
     }
 
     @Override

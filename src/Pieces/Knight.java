@@ -1,5 +1,8 @@
-package src;
+package src.Pieces;
 import java.util.*;
+
+import src.Game.Board;
+import src.Game.Move;
 public class Knight extends Piece {
     public Knight (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
@@ -10,7 +13,7 @@ public class Knight extends Piece {
             this.value = 3;
         else
             this.value = -3;
-        fileName = this.white ? "./Images/wN.png" : "./Images/bN.png";
+        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wN.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bN.png";
     }
 
     @Override

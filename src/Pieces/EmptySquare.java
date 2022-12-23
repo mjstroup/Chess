@@ -1,5 +1,7 @@
-package src;
+package src.Pieces;
 import java.util.*;
+
+import src.Game.Move;
 public class EmptySquare extends Piece {
     public boolean enPassant = false;
     public EmptySquare(int rlocation, int clocation) {

@@ -1,14 +1,20 @@
 package src;
 import java.util.*;
+
+import src.Engine.Engine;
+import src.Game.*;
+import src.Pieces.*;
+
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 
 public class Main {
     public static void main(String[] args) {
         Engine e = new Engine();
-        Board b = new Board(Piece.defaultFEN, e);
-        // Board b = new Board("k7/8/8/8/8/8/r2r4/7K w - - 0 1", e);
-        // Board b = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", e);
+        Board b = new Board(Piece.defaultFEN,e);
+        // Board b = new Board("8/p4r1k/3q1Pr1/1p1PpQPn/2p1P3/2P2KP1/P7/7R b - - 5 36");
+        // Board b = new Board("Q6Q/2Q5/2Q3Q1/8/4Q3/1k6/8/4K3 w - - 0 1", e);
+        // Board b = new Board("7k/8/3Q4/2Q5/8/4Q3/8/7K w - - 0 1");
 
         b.pack();
         b.setResizable(false);

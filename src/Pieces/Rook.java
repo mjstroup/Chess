@@ -1,5 +1,8 @@
-package src;
+package src.Pieces;
 import java.util.*;
+
+import src.Game.Board;
+import src.Game.Move;
 public class Rook extends Piece {
     public Rook (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
@@ -10,7 +13,7 @@ public class Rook extends Piece {
             this.value = 5;
         else
             this.value = -5;
-        fileName = this.white ? "./Images/wR.png" : "./Images/bR.png";
+        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wR.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bR.png";
     }
 
     @Override

@@ -1,6 +1,17 @@
-package src;
+package src.Game;
 import javax.swing.*;
 import javax.swing.border.*;
+
+import src.Engine.Engine;
+import src.Pieces.Bishop;
+import src.Pieces.EmptySquare;
+import src.Pieces.King;
+import src.Pieces.Knight;
+import src.Pieces.Pawn;
+import src.Pieces.Piece;
+import src.Pieces.Queen;
+import src.Pieces.Rook;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
@@ -21,6 +32,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     public static EmptySquare enPassantPiece;
     public static boolean whiteTurn = true;
     public static Piece[][] pieces;
+    public static String gameLog = "";
     private static Engine engine;
     private static int halfMoveCount = 0;
     private static int fullMoveCount = 1;
@@ -100,8 +112,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             originalPanel.setBackground(darkCover);
         currentPiece = componentToPiece(currentPanel);
         currentMoves = currentPiece.getLegalMoves();
-        System.out.println(currentPiece);
-        System.out.println(currentMoves);
     }
 
     public void mouseDragged(MouseEvent me) {
@@ -185,13 +195,14 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             parent.add(piece);
         }
         piece.setVisible(true);
+        Move validMoveClone = new Move(validMoveMove.startingPiece.clonePiece(), validMoveMove.endingPiece.clonePiece(), validMoveMove.promCharacter);
         movePiece(validMoveMove);
 
         currentPanel.setBackground(currentPanelColor);
         originalPanel.setBackground(originalPanelColor);
         //did the move really happen..
         if (!returned) {
-            postMove(movingPiece);
+            postMove(validMoveClone);
             if (engine != null) {
                 engine.playMove(this, Board.whiteTurn);
             }
@@ -203,9 +214,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         currentMoves = null;
         originalPanel = null;
         moveIsCapture = false;
-        // if (!returned && engine != null) {
-
-        // }
     }
 
     public void movePiece(Move move) {
@@ -462,12 +470,13 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         movingPiece.setLocation(destination.getR(), destination.getC());
     }
 
-    public void postMove(Piece movingPiece) {
+    public void postMove(Move move) {
+        Piece movingPiece = move.startingPiece;
         //play sound
         if (moveIsCapture)
-            playSound("../Sounds/Capture.wav");
+            playSound("../../Sounds/Capture.wav");
         else
-            playSound("../Sounds/Move.wav");
+            playSound("../../Sounds/Move.wav");
         //update half move count
         if (moveIsCapture || movingPiece instanceof Pawn)
             halfMoveCount = 0;
@@ -506,12 +515,12 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             repeatMap.put(fen, 1);
         }
         if (repeatMap.get(fen) == 3) {
-            throwStaleMate();
+            throwStaleMate(move);
         }
         //stalemate checks
         //50 move rule
         if (halfMoveCount == 100) {
-            throwStaleMate();
+            throwStaleMate(move);
         }
         //update full move
         if (whiteTurn) {
@@ -533,24 +542,24 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         }
         //2 kings
         if (whitePieces.size() == 1 && blackPieces.size() == 1) {
-            throwStaleMate();
+            throwStaleMate(move);
         }
         //2 kings + bishop or knight
         if ((whitePieces.size() == 1 || blackPieces.size() == 1) && (whitePieces.size() == 2 || blackPieces.size() == 2)) {
             if (blackPieces.size() == 2) {
                 if (blackPieces.get(0) instanceof Bishop || blackPieces.get(1) instanceof Bishop) {
-                    throwStaleMate();
+                    throwStaleMate(move);
                 }
                 if (blackPieces.get(0) instanceof Knight || blackPieces.get(1) instanceof Knight) {
-                    throwStaleMate();
+                    throwStaleMate(move);
                 }
             }
             if (whitePieces.size() == 2) {
                 if (whitePieces.get(0) instanceof Bishop || whitePieces.get(1) instanceof Bishop) {
-                    throwStaleMate();
+                    throwStaleMate(move);
                 }
                 if (whitePieces.get(0) instanceof Knight || whitePieces.get(1) instanceof Knight) {
-                    throwStaleMate();
+                    throwStaleMate(move);
                 }
             }
         }
@@ -560,16 +569,20 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 Bishop white = whitePieces.get(0) instanceof King ? (Bishop)whitePieces.get(1) : (Bishop)whitePieces.get(0);
                 Bishop black = blackPieces.get(0) instanceof King ? (Bishop)blackPieces.get(1) : (Bishop)blackPieces.get(0);
                 if ((white.getR() + white.getC()) % 2 == (black.getR() + black.getC()) % 2) {
-                    throwStaleMate();
+                    throwStaleMate(move);
                 }
             }
         }
         //checkmate check
         if (turnInCheckMate()) {
-            throwCheckMate();
+            throwCheckMate(move);
         } else if (turnInStaleMate()) {
-            throwStaleMate();
+            throwStaleMate(move);
+        } else if (turnInCheck()) {
+            move.check = true;
         }
+        gameLog += move + " ";
+        System.out.println(move);
     }
 
     /*
@@ -601,12 +614,13 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
         piece = pieceLabel;
 
+        Move moveClone = new Move(move.startingPiece.clonePiece(), move.endingPiece.clonePiece(), move.promCharacter);
         movePiece(move);
         
         this.originalPanel = startingPanel;
         this.currentPanel = endingPanel;
 
-        postMove(movingPiece);
+        postMove(moveClone);
         
         originalPanel = null;
         currentPanel = null;
@@ -688,15 +702,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (enPassantPiece != null) {
             enPassantPiece.enPassant = g.EPValue;
         }
-    }
-
-    public static String pieceToCoords(Piece p) {
-        int x = p.getR();
-        int y = p.getC();
-        String s = "";
-        s += (char)(y+97);
-        s += (8-x) + "";
-        return s;
     }
     
     public Piece coordsToPiece(String s, Piece[][] pieces) {
@@ -888,19 +893,67 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         return !turnInCheck() && getAllTurnMoves().size() == 0;
     }
 
-    public void throwCheckMate() {
-        //checkmate
-        dispose();
+    public void throwCheckMate(Move move) {
+        //write to game log
+        move.checkMate = true;
+        gameLog += move + " ";
+        gameLog += whiteTurn ? "0-1" : "1-0";
+        writeGameLog();
+        //announce in console
         String winner = whiteTurn ? "black" : "white";
         System.out.println("Checkmate for " + winner + ".");
+        //dispose
+        dispose();
         System.exit(0);
     }
 
-    public void throwStaleMate() {
-        //stalemate
-        dispose();
+    public void throwStaleMate(Move move) {
+        //write to game log
+        gameLog += move + " 1/2-1/2";
+        writeGameLog();
+        //announce in console
         System.out.println("Stalemate.");
+        //dispose
+        dispose();
         System.exit(0);
+    }
+
+    public void resign(boolean white) {
+        if (white)
+            gameLog += "0-1";
+        else
+            gameLog += "1-0";
+        writeGameLog();
+        String loser = white ? "White" : "Black";
+        System.out.println(loser + " resigned.");
+        //dispose
+        dispose();
+        System.exit(0);
+    }
+
+    public void resignNoDispose(boolean white) {
+        if (white)
+            gameLog += "0-1";
+        else
+            gameLog += "1-0";
+        writeGameLog();
+        String loser = white ? "White" : "Black";
+        System.out.println(loser + " resigned.");
+    }
+
+    public void draw() {
+        gameLog += "1/2-1/2";
+        writeGameLog();
+        System.out.println("Players agreed to a draw.");
+        //dispose
+        dispose();
+        System.exit(0);
+    }
+
+    public void drawNoDispose() {
+        gameLog += "1/2-1/2";
+        writeGameLog();
+        System.out.println("Players agreed to a draw.");
     }
 
     public ArrayList<Move> getAllMoves(boolean white) {
@@ -980,12 +1033,24 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (e == null) {
             fen += "- ";
         } else {
-            fen += pieceToCoords(e) + " ";
+            fen += e + " ";
         }
         fen += halfMoveCount + " ";
         fen += fullMoveCount;
 
         return fen;
+    }
+
+    public void writeGameLog() {
+        try {
+            File f = new File("/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/src/Game/log.txt");
+            FileWriter fw = new FileWriter(f);
+            BufferedWriter bfw = new BufferedWriter(fw);
+            bfw.write(gameLog);
+            bfw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String toString() {

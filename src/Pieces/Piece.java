@@ -1,5 +1,8 @@
-package src;
+package src.Pieces;
 import java.util.*;
+
+import src.Game.Board;
+import src.Game.Move;
 public class Piece {
     public char abbreviation;
     public String fileName;
@@ -213,6 +216,7 @@ public class Piece {
         //check king squares
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
+                if (i == 0 && j == 0) continue;
                 int r2 = rlocation + i;
                 int c2 = clocation + j;
                 if (r2 <= 7 && r2 >= 0 && c2 <= 7 && c2 >= 0 && Board.pieces[r2][c2] instanceof King && Board.pieces[r2][c2].white == white)
@@ -835,7 +839,15 @@ public class Piece {
                 }
             }
         }   
-        
         return list;
+    }
+
+    public String toString() {
+        int x = rlocation;
+        int y = clocation;
+        String s = "";
+        s += (char)(y+97);
+        s += (8-x) + "";
+        return s;
     }
 }

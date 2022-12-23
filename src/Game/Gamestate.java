@@ -1,6 +1,8 @@
-package src;
+package src.Game;
 
 import java.util.*;
+
+import src.Pieces.EmptySquare;
 
 public class Gamestate {
     HashMap<String, Integer> repeatMap;

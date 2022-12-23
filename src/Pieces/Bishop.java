@@ -1,16 +1,19 @@
-package src;
+package src.Pieces;
 import java.util.*;
-public class Queen extends Piece {
-    public Queen (Boolean white, int rlocation, int clocation) {
+
+import src.Game.Board;
+import src.Game.Move;
+public class Bishop extends Piece {
+    public Bishop(Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
         this.clocation = clocation;
         this.white = white;
-        this.abbreviation = 'q';
+        this.abbreviation = 'b';
         if (white)
-            this.value = 9;
+            this.value = 3;
         else
-            this.value = -9;
-        fileName = this.white ? "./Images/wQ.png" : "./Images/bQ.png";
+            this.value = -3;
+        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wB.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bB.png";
     }
 
     @Override
@@ -36,8 +39,8 @@ public class Queen extends Piece {
     public ArrayList<Move> getAttackingMoves() {
         return getSlidingAttackingMoves();
     }
-
-    public Queen clonePiece() {
-        return new Queen(this.white, this.rlocation, this.clocation);
+    
+    public Bishop clonePiece() {
+        return new Bishop(this.white, this.rlocation, this.clocation);
     }
 }

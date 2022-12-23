@@ -1,5 +1,8 @@
-package src;
+package src.Pieces;
 import java.util.*;
+
+import src.Game.Board;
+import src.Game.Move;
 public class King extends Piece {
     public boolean queenCastleRights = false;
     public boolean kingCastleRights = false;
@@ -9,7 +12,7 @@ public class King extends Piece {
         this.white = white;
         this.abbreviation = 'k';
         this.value = 0;
-        fileName = this.white ? "./Images/wK.png" : "./Images/bK.png";
+        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wK.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bK.png";
     }
 
     @Override
@@ -54,6 +57,7 @@ public class King extends Piece {
         }
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
+                if (i == 0 && j == 0) continue;
                 int r = rlocation + i;
                 int c = clocation + j;
                 if (r <= 7 && r >= 0 && c <= 7 && c >= 0 && (Board.pieces[r][c] instanceof EmptySquare || Board.pieces[r][c].white != this.white) && ((this.white && !Board.pieces[r][c].isAttackedByBlack()) || (!this.white && !Board.pieces[r][c].isAttackedByWhite())))

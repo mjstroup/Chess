@@ -1,4 +1,4 @@
-package src;
+package src.Testing;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,6 +7,9 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import org.junit.Test;
+
+import src.Game.Board;
+import src.Game.Move;
 
 public class GenerationTest {
 
