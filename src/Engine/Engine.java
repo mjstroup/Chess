@@ -1,5 +1,6 @@
 package src.Engine;
 
+import java.io.*;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -15,7 +16,12 @@ public class Engine {
     private static final int SEARCH_DEPTH = 4;
     private static Move bestMove;
     private static int positions = 0;
-    public void playMove(Board b, boolean white) {
+    public void playMove(Board b) {
+        if (b.getFullMoveCount() < 5) {
+            if (playDatabaseMove(b)) {
+                return;
+            }
+        }
         LocalTime start = LocalTime.now();
         alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH);
         b.remoteMove(bestMove);
@@ -24,7 +30,46 @@ public class Engine {
         System.out.println(String.format("Time: %dms\t\tPositions evaluated:%d", ms, positions));
         positions = 0;
     }
-    public static int evaluate(Board board, int depth) {
+
+    public boolean playDatabaseMove(Board b) {
+        LocalTime start = LocalTime.now();
+        ArrayList<String> possibleMoves = new ArrayList<>();
+        try {
+            File f = new File("/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Games/Games.txt");
+            FileReader fr = new FileReader(f);
+            BufferedReader bfr = new BufferedReader(fr);
+            String line = bfr.readLine();
+            while (line != null) {
+                String checkEqual = line.substring(0, Board.gameLog.length());
+                if (checkEqual.equals(Board.gameLog)) {
+                    line = line.substring(Board.gameLog.length());
+                    if (!line.equals("1-0") && !line.equals("0-1") && !line.equals("1/2-1/2")) {
+                        String move = line.substring(0, line.indexOf(" "));
+                        possibleMoves.add(move);
+                    }
+                }
+                line = bfr.readLine();
+            }
+            bfr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (possibleMoves.size() == 0) {
+            //couldn't find a move
+            return false;
+        }
+        //pick a random move and play it..
+        int index = (int)(Math.random()*possibleMoves.size());
+        b.remoteMove(new Move(possibleMoves.get(index)));
+
+        LocalTime end = LocalTime.now();
+        long ms = start.until(end, ChronoUnit.MILLIS);
+        System.out.println(String.format("Time: %dms", ms));
+        //successfully played move
+        return true;
+    }
+
+    public int evaluate(Board board, int depth) {
         if (board.turnInCheckMate()) {
             return -1000000-depth;
         }
@@ -42,7 +87,7 @@ public class Engine {
         return eval * perspective;
     }
 
-    public static int alphaBetaMax(Board board, int alpha, int beta, int depth) {
+    public int alphaBetaMax(Board board, int alpha, int beta, int depth) {
         if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
             positions++;
             return evaluate(board, depth);
@@ -67,7 +112,7 @@ public class Engine {
         return alpha;
     }
 
-    public static int alphaBetaMin(Board board, int alpha, int beta, int depth) {
+    public int alphaBetaMin(Board board, int alpha, int beta, int depth) {
         if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
             positions++;
             return evaluate(board, depth) * -1;
@@ -85,7 +130,7 @@ public class Engine {
         return beta;
     }
 
-    public static void moveOrder(ArrayList<Move> moves) {
+    public void moveOrder(ArrayList<Move> moves) {
         int[] moveScores = new int[moves.size()];
         for (int i = 0; i < moves.size(); i++) {
             Move m = moves.get(i);
@@ -137,7 +182,7 @@ public class Engine {
         sortMoves(moves, moveScores);
     }
 
-    public static void sortMoves(ArrayList<Move> moves, int[] moveScores) {
+    public void sortMoves(ArrayList<Move> moves, int[] moveScores) {
         for (int i = 0; i < moves.size()-1; i++) {
             for (int j = i + 1; j > 0; j--) {
                 int swap = j-1;

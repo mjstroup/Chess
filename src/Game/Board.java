@@ -204,7 +204,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (!returned) {
             postMove(validMoveClone);
             if (engine != null) {
-                engine.playMove(this, Board.whiteTurn);
+                engine.playMove(this);
             }
         }
         piece = null;
@@ -582,7 +582,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             move.check = true;
         }
         gameLog += move + " ";
-        System.out.println(move);
+        // System.out.println(move);
     }
 
     /*
@@ -1039,6 +1039,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         fen += fullMoveCount;
 
         return fen;
+    }
+
+    public int getFullMoveCount() {
+        return Board.fullMoveCount;
     }
 
     public void writeGameLog() {
