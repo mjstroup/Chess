@@ -472,6 +472,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public void postMove(Move move) {
         Piece movingPiece = move.startingPiece;
+        
+        whiteTurn = !whiteTurn;
         //play sound
         if (moveIsCapture)
             playSound("../../Sounds/Capture.wav");
@@ -505,7 +507,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         previousMoveOriginalPanel = originalPanel;
         previousMoveCurrentPanel = currentPanel;
         
-        whiteTurn = !whiteTurn;
         //3 move stalemate
         String fen = this.getFEN();
         fen = fen.substring(0, Board.ordinalIndexOf(fen, " ", 4));
@@ -582,7 +583,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             move.check = true;
         }
         gameLog += move + " ";
-        // System.out.println(move);
+        System.out.println(move);
     }
 
     /*

@@ -8,12 +8,10 @@ import java.util.Collections;
 
 import src.Game.Board;
 import src.Game.Move;
-import src.Pieces.EmptySquare;
-import src.Pieces.Pawn;
-import src.Pieces.Piece;
+import src.Pieces.*;
 
 public class Engine {
-    private static final int SEARCH_DEPTH = 4;
+    private static final int SEARCH_DEPTH = 5;
     private static Move bestMove;
     private static int positions = 0;
     public void playMove(Board b) {
@@ -23,7 +21,7 @@ public class Engine {
             }
         }
         LocalTime start = LocalTime.now();
-        alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH);
+        System.out.println("Best eval we see: " + alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH));
         b.remoteMove(bestMove);
         LocalTime end = LocalTime.now();
         long ms = start.until(end, ChronoUnit.MILLIS);
@@ -77,14 +75,51 @@ public class Engine {
             return 0;
         }
         int eval = 0;
+        int whiteEval = 0;
+        int blackEval = 0;
         for (int i = 0; i < Board.pieces.length; i++) {
             for (int j = 0; j < Board.pieces.length; j++) {
                 Piece p = Board.pieces[i][j];
+                if (p instanceof EmptySquare) continue;
+                if (p.white)
+                    whiteEval += p.value;
+                else
+                    blackEval += p.value;
+            }
+        }
+        int materialCount = whiteEval+blackEval;
+        whiteEval += endGameEval(true, endGameWeight(true), materialCount);
+        blackEval += endGameEval(false, endGameWeight(false), materialCount);
+        eval = whiteEval+blackEval;
+        int perspective = Board.whiteTurn ? 1 : -1;
+        return eval * perspective;
+    }
+
+    public int endGameWeight(boolean white) {
+        int eval = 0;
+        for (int i = 0; i < Board.pieces.length; i++) {
+            for (int j = 0; j < Board.pieces.length; j++) {
+                Piece p = Board.pieces[i][j];
+                if (p instanceof Pawn) continue;
                 eval += p.value;
             }
         }
-        int perspective = Board.whiteTurn ? 1 : -1;
-        return eval * perspective;
+        return eval/2;
+    }
+
+    public int endGameEval(boolean white, int endGameWeight, int eval) {
+        double endGameEval = 0;
+        //ensure calling team is more than 3 points (enough to checkmate) ahead
+        if ((white && eval > 3) || (!white && eval < -3)) {
+            King enemyKing = white ? Board.blackKing : Board.whiteKing;
+            //pythagorean theorem for distance from center
+            double rdistanceFromCenter = Math.abs(3-enemyKing.rlocation);
+            double cdistanceFromCenter = Math.abs(3-enemyKing.clocation);
+            double distanceFromCenter = Math.sqrt(Math.pow(rdistanceFromCenter,2) + Math.pow(cdistanceFromCenter,2));
+            endGameEval += distanceFromCenter;
+            return (int)(endGameEval*endGameWeight);
+        }
+        return (int)endGameEval;
     }
 
     public int alphaBetaMax(Board board, int alpha, int beta, int depth) {
@@ -101,7 +136,7 @@ public class Engine {
             int value = alphaBetaMin(board, alpha, beta, depth-1);
             board.APIUnMove(m, clone);
             if (value >= beta)
-                return beta;
+            return beta;
             if (value > alpha) {
                 alpha = value;
                 if (depth == SEARCH_DEPTH) {
