@@ -1,7 +1,5 @@
 # Chess Engine
 
-![Image](https://github.com/mjstroup/Images/blob/main/chess.png)
-
 # Table of Contents
 - [1. Overview](#1-overview)
 - [2. Move Generation](#2-move-generation)
@@ -17,6 +15,8 @@
   - [3.4. Endgame Optimizations](#34-endgame-optimizations)
 - [4. Usage](#4-usage)
 - [5. Credits](#5-credits)
+
+![Image](https://github.com/mjstroup/Images/blob/main/chess.png)
   
 
 # 1. Overview
