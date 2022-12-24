@@ -132,7 +132,7 @@ Minimax does however waste a bunch of time calculating lines it does not have to
 
 ![Image](https://github.com/mjstroup/Images/blob/main/a-bp.png)
 
-Alpha-beta pruning is an optimization done to minimax in which two values, alpha and beta, representing the minimum score that the maximizing player is guaranteed and the maximum score that the minimizing player is guaranteed respectively are stored. Starting out, alpha is negative infinity and beta is positive infinity, as neither player is assured of any score.
+Alpha-beta pruning is an optimization done to minimax in which two values, alpha and beta, representing the minimum score that the maximizing player is guaranteed and the maximum score that the minimizing player is guaranteed respectively, are stored. Starting out, alpha is negative infinity and beta is positive infinity, as neither player is assured of any score.
 
 As the move tree is filled out, whenever the maximizing player encounters a value that is greater than beta, it is ensured that the optimal move does not belong to this branch, as the minimizing player will never opt to choose a potentially larger-scored branch within the move tree when it can choose its guaranteed worst-case maximum score, beta. Therefore, the rest of the branch does not need to be calculated and can be pruned. 
 
