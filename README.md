@@ -61,7 +61,7 @@ From there, I decided to switch to a more manual approach to resolve/prevent che
 
 1. The king is not in check, generate all possible moves and return.
 2. The king is checked by one piece and has three ways of resolving the check.
-   1. Capture the checking piece with a non-pinned piece.
+   1. Capture the checking piece with a non-absolutely pinned piece.
    2. Block the check, if the checking piece is sliding (i.e. Bishop, Rook, or Queen), with a non-pinned piece.
    3. Move the king to a non-attacked square
 3. The king is checked by two pieces, in which case the king must move to a non-attacked piece.
