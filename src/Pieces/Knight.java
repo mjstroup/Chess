@@ -13,7 +13,7 @@ public class Knight extends Piece {
             this.value = 3;
         else
             this.value = -3;
-        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wN.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bN.png";
+        fileName = this.white ? "Images/wN.png" : "Images/bN.png";
     }
 
     @Override

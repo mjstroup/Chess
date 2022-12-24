@@ -12,7 +12,7 @@ public class King extends Piece {
         this.white = white;
         this.abbreviation = 'k';
         this.value = 0;
-        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wK.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bK.png";
+        fileName = this.white ? "Images/wK.png" : "Images/bK.png";
     }
 
     @Override

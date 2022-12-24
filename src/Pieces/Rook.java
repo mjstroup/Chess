@@ -13,7 +13,7 @@ public class Rook extends Piece {
             this.value = 5;
         else
             this.value = -5;
-        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wR.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bR.png";
+        fileName = this.white ? "Images/wR.png" : "Images/bR.png";
     }
 
     @Override

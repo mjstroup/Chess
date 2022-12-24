@@ -11,9 +11,9 @@ import src.Game.Move;
 import src.Pieces.*;
 
 public class Engine {
-    //TODO: fix "Mate in #" messages
-    //TODO: piece maps
-    //TODO: endgame weights
+    //TODO: fix "Mate in #" messages!
+    //TODO: piece maps!
+    //TODO: endgame weights!
     private static final int[][] kingEndPoints = new int[][]{
         {15,12,12,12,12,12,12,15},
         {12,8,8,8,8,8,8,12},
@@ -24,9 +24,12 @@ public class Engine {
         {12,8,8,8,8,8,8,12},
         {15,12,12,12,12,12,12,15}
     };
-    private static final int SEARCH_DEPTH = 4;
+    private int SEARCH_DEPTH;
     private static Move bestMove;
     private static int positions = 0;
+    public Engine(int depth) {
+        this.SEARCH_DEPTH = depth;
+    }
     public void playMove(Board b) {
         if (b.getFullMoveCount() < 5) {
             if (playDatabaseMove(b)) {
@@ -36,7 +39,6 @@ public class Engine {
         LocalTime start = LocalTime.now();
         int eval = -1*alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH);
         b.remoteMove(bestMove);
-        System.out.println("Current Eval: " + evaluate(b, 0));
         LocalTime end = LocalTime.now();
         long ms = start.until(end, ChronoUnit.MILLIS);
         String evalS = eval + "";
@@ -53,7 +55,7 @@ public class Engine {
         LocalTime start = LocalTime.now();
         ArrayList<String> possibleMoves = new ArrayList<>();
         try {
-            File f = new File("/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Games/Games.txt");
+            File f = new File("Games/Games.txt");
             FileReader fr = new FileReader(f);
             BufferedReader bfr = new BufferedReader(fr);
             String line = bfr.readLine();
@@ -112,9 +114,9 @@ public class Engine {
                     blackEval -= p.value;
             }
         }
-        int materialCount = whiteEval-blackEval;
-        double whiteWeight = endGameWeight(true);
-        double blackWeight = endGameWeight(false);
+        // int materialCount = whiteEval-blackEval;
+        // double whiteWeight = endGameWeight(true);
+        // double blackWeight = endGameWeight(false);
         // whiteEval += endGameEval(true, whiteWeight, materialCount);
         // blackEval += endGameEval(false, blackWeight, materialCount);
         eval = whiteEval-blackEval;
@@ -153,11 +155,7 @@ public class Engine {
     }
 
     public int alphaBetaMax(Board board, int alpha, int beta, int depth) {
-        if (depth == 0) {
-            positions++;
-            return evaluate(board, depth);
-        }
-        if (board.turnInCheckMate() || board.turnInStaleMate()) {
+        if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
             positions++;
             return evaluate(board, depth);
         }
@@ -170,7 +168,7 @@ public class Engine {
             int value = alphaBetaMin(board, alpha, beta, depth-1);
             board.APIUnMove(m, clone);
             if (value >= beta)
-            return beta;
+                return beta;
             if (value > alpha) {
                 alpha = value;
                 if (depth == SEARCH_DEPTH) {
@@ -182,15 +180,14 @@ public class Engine {
     }
 
     public int alphaBetaMin(Board board, int alpha, int beta, int depth) {
-        if (depth == 0) {
+        if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
             positions++;
             return evaluate(board, depth) * -1;
         }
-        if (board.turnInCheckMate() || board.turnInStaleMate()) {
-            positions++;
-            return evaluate(board, depth) * -1;
-        }
-        for (Move m : board.getAllTurnMoves()) {
+        ArrayList<Move> moveList = board.getAllTurnMoves();
+        //move order
+        moveOrder(moveList);
+        for (Move m : moveList) {
             Move clone = new Move(m.startingPiece.clonePiece(), m.endingPiece.clonePiece(), m.promCharacter);
             board.APIMove(m);
             int value = alphaBetaMax(board, alpha, beta, depth-1);
@@ -202,11 +199,6 @@ public class Engine {
         }
         return beta;
     }
-
-    // public void searchCaptures(Board b, int alpha, int beta) {
-    //     int eval = evaluate(b, 0);
-
-    // }
 
     public void moveOrder(ArrayList<Move> moves) {
         double[] moveScores = new double[moves.size()];
@@ -240,17 +232,17 @@ public class Engine {
                 if ((startingPiece.white && startingPiece.rlocation != 0) || (!startingPiece.white && startingPiece.rlocation != 7)) {
                     if (startingPiece.clocation == 0) {
                         if (Board.pieces[startingPiece.rlocation+offset][startingPiece.clocation+1] instanceof Pawn) {
-                            score -= 350;
+                            score -= 3;
                         }
                     } else if (startingPiece.clocation == 7) {
                         if (Board.pieces[startingPiece.rlocation+offset][startingPiece.clocation-1] instanceof Pawn) {
-                            score -= 350;
+                            score -= 3;
                         }
                     } else {
                         Piece r = Board.pieces[startingPiece.rlocation+offset][startingPiece.clocation+1];
                         Piece l = Board.pieces[startingPiece.rlocation+offset][startingPiece.clocation-1];
                         if (r instanceof Pawn || l instanceof Pawn) {
-                            score -= 350;
+                            score -= 3;
                         }
                     }
                 }       

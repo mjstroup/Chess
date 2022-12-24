@@ -1061,7 +1061,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public void writeGameLog() {
         try {
-            File f = new File("/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/src/Game/log.txt");
+            File f = new File("src/Game/log.txt");
             FileWriter fw = new FileWriter(f);
             BufferedWriter bfw = new BufferedWriter(fw);
             bfw.write(gameLog);

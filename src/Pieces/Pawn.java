@@ -13,7 +13,7 @@ public class Pawn extends Piece {
             this.value = 1;
         else
             this.value = -1;
-        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wP.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bP.png";
+        fileName = this.white ? "Images/wP.png" : "Images/bP.png";
     }
 
     @Override

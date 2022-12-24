@@ -13,7 +13,7 @@ public class Queen extends Piece {
             this.value = 9;
         else
             this.value = -9;
-        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wQ.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bQ.png";
+        fileName = this.white ? "Images/wQ.png" : "Images/bQ.png";
     }
 
     @Override

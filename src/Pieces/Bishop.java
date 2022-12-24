@@ -13,7 +13,7 @@ public class Bishop extends Piece {
             this.value = 3.2;
         else
             this.value = -3.2;
-        fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wB.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bB.png";
+        fileName = this.white ? "Images/wB.png" : "Images/bB.png";
     }
 
     @Override
