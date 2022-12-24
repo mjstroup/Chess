@@ -15,11 +15,10 @@
   - [3.4. Endgame Optimizations](#34-endgame-optimizations)
 - [4. Usage](#4-usage)
 - [5. Credits](#5-credits)
+ 
+# 1. Overview
 
 ![Image](https://github.com/mjstroup/Images/blob/main/chess.png)
-  
-
-# 1. Overview
 
 When I started this project, I didn't realize how deep of a rabbit hole chess programming was. There are articles and articles of algorithms, optimizations, and history on chessprogramming.org. Chess has been a passion of mine for over ten years, so it's really nice to pay tribute to it with this project.
 
