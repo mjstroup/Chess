@@ -10,9 +10,9 @@ public class Bishop extends Piece {
         this.white = white;
         this.abbreviation = 'b';
         if (white)
-            this.value = 3;
+            this.value = 3.2;
         else
-            this.value = -3;
+            this.value = -3.2;
         fileName = this.white ? "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/wB.png" : "/Users/matthewstroup/Desktop/CS/PROJECTS/Chess/Images/bB.png";
     }
 

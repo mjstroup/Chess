@@ -14,7 +14,7 @@ public class Piece {
     public ArrayList<Move> getAttackingMoves(){return null;}
     public Piece clonePiece(){return null;}
     public static final String defaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    public int value;
+    public double value;
 
     public int getR() {
         return this.rlocation;

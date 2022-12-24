@@ -11,7 +11,20 @@ import src.Game.Move;
 import src.Pieces.*;
 
 public class Engine {
-    private static final int SEARCH_DEPTH = 5;
+    //TODO: fix "Mate in #" messages
+    //TODO: piece maps
+    //TODO: endgame weights
+    private static final int[][] kingEndPoints = new int[][]{
+        {15,12,12,12,12,12,12,15},
+        {12,8,8,8,8,8,8,12},
+        {12,8,3,3,3,3,8,12},
+        {12,8,3,0,0,3,8,12},
+        {12,8,3,0,0,3,8,12},
+        {12,8,3,3,3,3,8,12},
+        {12,8,8,8,8,8,8,12},
+        {15,12,12,12,12,12,12,15}
+    };
+    private static final int SEARCH_DEPTH = 4;
     private static Move bestMove;
     private static int positions = 0;
     public void playMove(Board b) {
@@ -21,11 +34,18 @@ public class Engine {
             }
         }
         LocalTime start = LocalTime.now();
-        System.out.println("Best eval we see: " + alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH));
+        int eval = -1*alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH);
         b.remoteMove(bestMove);
+        System.out.println("Current Eval: " + evaluate(b, 0));
         LocalTime end = LocalTime.now();
         long ms = start.until(end, ChronoUnit.MILLIS);
-        System.out.println(String.format("Time: %dms\t\tPositions evaluated:%d", ms, positions));
+        String evalS = eval + "";
+        if (eval >= 1000000) {
+            evalS = "Mate in " + eval%10;
+        } else if (eval <= -1000000) {
+            evalS = "Mate in " + (eval*-1)%10;
+        }
+        System.out.println(String.format("Move: %s\tEval:%s\t\t\tPositions Evaluated: %d\tTime:%dms", bestMove, evalS, positions, ms));
         positions = 0;
     }
 
@@ -58,11 +78,16 @@ public class Engine {
         }
         //pick a random move and play it..
         int index = (int)(Math.random()*possibleMoves.size());
-        b.remoteMove(new Move(possibleMoves.get(index)));
-
+        Move move = new Move(possibleMoves.get(index));
+        b.remoteMove(move);
+        int eval = evaluate(b, 0);
+        String evalS = eval + "";
+        if (eval > 1000000) {
+            evalS = "Mate in " + eval%10;
+        }
         LocalTime end = LocalTime.now();
         long ms = start.until(end, ChronoUnit.MILLIS);
-        System.out.println(String.format("Time: %dms", ms));
+        System.out.println(String.format("Move: %s\tEval:%s\t\t\tPositions Evaluated: %d\tTime:%dms", move, evalS, positions, ms));
         //successfully played move
         return true;
     }
@@ -84,46 +109,55 @@ public class Engine {
                 if (p.white)
                     whiteEval += p.value;
                 else
-                    blackEval += p.value;
+                    blackEval -= p.value;
             }
         }
-        int materialCount = whiteEval+blackEval;
-        whiteEval += endGameEval(true, endGameWeight(true), materialCount);
-        blackEval += endGameEval(false, endGameWeight(false), materialCount);
-        eval = whiteEval+blackEval;
+        int materialCount = whiteEval-blackEval;
+        double whiteWeight = endGameWeight(true);
+        double blackWeight = endGameWeight(false);
+        // whiteEval += endGameEval(true, whiteWeight, materialCount);
+        // blackEval += endGameEval(false, blackWeight, materialCount);
+        eval = whiteEval-blackEval;
         int perspective = Board.whiteTurn ? 1 : -1;
         return eval * perspective;
     }
 
-    public int endGameWeight(boolean white) {
+    public double endGameWeight(boolean white) {
         int eval = 0;
         for (int i = 0; i < Board.pieces.length; i++) {
             for (int j = 0; j < Board.pieces.length; j++) {
                 Piece p = Board.pieces[i][j];
-                if (p instanceof Pawn) continue;
-                eval += p.value;
+                if (p instanceof Pawn || p instanceof EmptySquare) continue;
+                if (p.white == white)
+                    eval += p.value;
             }
         }
-        return eval/2;
+        if (!white) eval*=-1;
+        return 1-Math.min(1, eval*0.0006);
     }
 
-    public int endGameEval(boolean white, int endGameWeight, int eval) {
+    public int endGameEval(boolean white, double endGameWeight, int material) {
         double endGameEval = 0;
         //ensure calling team is more than 3 points (enough to checkmate) ahead
-        if ((white && eval > 3) || (!white && eval < -3)) {
+        if ((white && material > 2) || (!white && material < -2)) {
+            King ourKing = white ? Board.whiteKing : Board.blackKing;
             King enemyKing = white ? Board.blackKing : Board.whiteKing;
-            //pythagorean theorem for distance from center
-            double rdistanceFromCenter = Math.abs(3-enemyKing.rlocation);
-            double cdistanceFromCenter = Math.abs(3-enemyKing.clocation);
-            double distanceFromCenter = Math.sqrt(Math.pow(rdistanceFromCenter,2) + Math.pow(cdistanceFromCenter,2));
-            endGameEval += distanceFromCenter;
-            return (int)(endGameEval*endGameWeight);
+            endGameEval+=kingEndPoints[enemyKing.rlocation][enemyKing.clocation]*10;
+
+            int orthogDistance = Math.abs(ourKing.rlocation-enemyKing.rlocation)+Math.abs(ourKing.clocation-enemyKing.clocation);
+            endGameEval += (14-orthogDistance)*3;
+
+            return (int)(endGameEval*endGameWeight*0.25);
         }
-        return (int)endGameEval;
+        return 0;
     }
 
     public int alphaBetaMax(Board board, int alpha, int beta, int depth) {
-        if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
+        if (depth == 0) {
+            positions++;
+            return evaluate(board, depth);
+        }
+        if (board.turnInCheckMate() || board.turnInStaleMate()) {
             positions++;
             return evaluate(board, depth);
         }
@@ -148,7 +182,11 @@ public class Engine {
     }
 
     public int alphaBetaMin(Board board, int alpha, int beta, int depth) {
-        if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
+        if (depth == 0) {
+            positions++;
+            return evaluate(board, depth) * -1;
+        }
+        if (board.turnInCheckMate() || board.turnInStaleMate()) {
             positions++;
             return evaluate(board, depth) * -1;
         }
@@ -165,13 +203,18 @@ public class Engine {
         return beta;
     }
 
+    // public void searchCaptures(Board b, int alpha, int beta) {
+    //     int eval = evaluate(b, 0);
+
+    // }
+
     public void moveOrder(ArrayList<Move> moves) {
-        int[] moveScores = new int[moves.size()];
+        double[] moveScores = new double[moves.size()];
         for (int i = 0; i < moves.size(); i++) {
             Move m = moves.get(i);
             Piece startingPiece = m.startingPiece;
             Piece endingPiece = m.endingPiece;
-            int score = 0;
+            double score = 0;
 
             if (!(endingPiece instanceof EmptySquare)) {
                 score = 10 * Math.abs(endingPiece.value) - Math.abs(startingPiece.value);
@@ -217,13 +260,13 @@ public class Engine {
         sortMoves(moves, moveScores);
     }
 
-    public void sortMoves(ArrayList<Move> moves, int[] moveScores) {
+    public void sortMoves(ArrayList<Move> moves, double[] moveScores) {
         for (int i = 0; i < moves.size()-1; i++) {
             for (int j = i + 1; j > 0; j--) {
                 int swap = j-1;
                 if (moveScores[swap] < moveScores[j]) {
                     Collections.swap(moves, j, swap);
-                    int temp = moveScores[j];
+                    double temp = moveScores[j];
                     moveScores[j] = moveScores[swap];
                     moveScores[swap] = temp; 
                 }

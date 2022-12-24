@@ -11,8 +11,9 @@ import java.time.temporal.ChronoUnit;
 public class Main {
     public static void main(String[] args) {
         Engine e = new Engine();
-        // Board b = new Board(Piece.defaultFEN,e);
-        Board b = new Board("8/6r1/p7/1p6/1P1R4/8/5K1p/7k b - - 0 1",e);
+        Board b = new Board(Piece.defaultFEN,e);
+        // Board b = new Board("3r4/8/3k4/8/8/3K4/8/8 w - - 0 1",e);
+        // Board b = new Board("8/3K4/4P3/8/8/8/6k1/7q w - - 0 1",e);
         // Board b = new Board("Q7/5p1p/5P2/5PPN/6Pk/4N1Rp/7P/6K1 b - - 0 1",e);
         // Board b = new Board("Q6Q/2Q5/2Q3Q1/8/4Q3/1k6/8/4K3 w - - 0 1", e);
         // Board b = new Board("7k/8/3Q4/2Q5/8/4Q3/8/7K w - - 0 1");

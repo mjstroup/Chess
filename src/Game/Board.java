@@ -57,6 +57,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     public Board(String FENString, Engine e) {
         engine = e;
         repeatMap = new HashMap<>();
+        repeatMap.put(FENString.substring(0, Board.ordinalIndexOf(FENString, " ", 4)), 1);
         previousGamestates = new Stack<>();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pieces = fenStringToPieces(FENString);
@@ -515,9 +516,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         } else {
             repeatMap.put(fen, 1);
         }
-        if (repeatMap.get(fen) == 3) {
-            throwStaleMate(move);
-        }
         //stalemate checks
         //50 move rule
         if (halfMoveCount == 100) {
@@ -583,7 +581,6 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
             move.check = true;
         }
         gameLog += move + " ";
-        System.out.println(move);
     }
 
     /*
@@ -634,9 +631,16 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         if (enPassantPiece != null) {
             value = enPassantPiece.enPassant;
         }
-        previousGamestates.push(new Gamestate(whiteTurn, repeatMap, halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights, enPassantPiece, value, moveIsCapture));
+        previousGamestates.push(new Gamestate(whiteTurn, new HashMap<String, Integer>(repeatMap), halfMoveCount, fullMoveCount, whiteKing.kingCastleRights, whiteKing.queenCastleRights, blackKing.kingCastleRights, blackKing.queenCastleRights, enPassantPiece, value, moveIsCapture));
         APImovePiece(move);
         whiteTurn = !whiteTurn;
+        String fen = getFEN();
+        fen = fen.substring(0, Board.ordinalIndexOf(fen, " ", 4));
+        if (repeatMap.get(fen) != null) {
+            repeatMap.put(fen, repeatMap.get(fen)+1);
+        } else {
+            repeatMap.put(fen, 1);
+        }
     }
 
     public void APIUnMove(Move move, Move clone) {
@@ -891,6 +895,11 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public boolean turnInStaleMate() {
+        String fen = getFEN();
+        fen = fen.substring(0, Board.ordinalIndexOf(fen, " ", 4));
+        if (repeatMap.get(fen) != null && repeatMap.get(fen) == 3) {
+            return true;
+        }
         return !turnInCheck() && getAllTurnMoves().size() == 0;
     }
 
@@ -1044,6 +1053,10 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
 
     public int getFullMoveCount() {
         return Board.fullMoveCount;
+    }
+
+    public HashMap<String, Integer> getRepeatMap() {
+        return repeatMap;
     }
 
     public void writeGameLog() {
