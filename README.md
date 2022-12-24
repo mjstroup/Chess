@@ -142,7 +142,7 @@ The optimizations that occur with Alpha-beta pruning are somewhat luck based, as
 
 ## 3.3. [Move Ordering](https://www.chessprogramming.org/Move_Ordering)
 
-Move ordering is extremely simple to do for how effective of an optimization it is. Each move gets assigned a "score", and then the moves are sorted based on their score and then evaluated by Alpha-beta pruning. 
+Move ordering is extremely simple to do for how effective of an optimization it is. Each move gets assigned a "score", the moves are sorted based on these scores, and then they are evaluated by Alpha-beta pruning. 
 
 The way I implemented move ordering is by incentivising a couple of behaviors such as capturing a high valued piece with a low valued piece, promoting pawns, and capturing pieces with pawns. This could be further optimized by incentivising checks as well.
 
