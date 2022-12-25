@@ -9,11 +9,31 @@ public class Bishop extends Piece {
         this.clocation = clocation;
         this.white = white;
         this.abbreviation = 'b';
-        if (white)
-            this.value = 3.2;
-        else
-            this.value = -3.2;
-        fileName = this.white ? "Images/wB.png" : "Images/bB.png";
+        this.value = 330;
+        this.fileName = this.white ? "Images/wB.png" : "Images/bB.png";
+        if (this.white) {
+            this.mapping = new int[][]{
+                {-20,-10,-10,-10,-10,-10,-10,-20},
+                {-10,  0,  0,  0,  0,  0,  0,-10},
+                {-10,  0,  5, 10, 10,  5,  0,-10},
+                {-10,  5,  5, 10, 10,  5,  5,-10},
+                {-10,  0, 10, 10, 10, 10,  0,-10},
+                {-10, 10, 10, 10, 10, 10, 10,-10},
+                {-10,  5,  0,  0,  0,  0,  5,-10},
+                {-20,-10,-10,-10,-10,-10,-10,-20}
+            };
+        } else {
+            this.mapping = new int[][]{
+                {-20,-10,-10,-10,-10,-10,-10,-20},
+                {-10,  5,  0,  0,  0,  0,  5,-10},
+                {-10, 10, 10, 10, 10, 10, 10,-10},
+                {-10,  0, 10, 10, 10, 10,  0,-10},
+                {-10,  5,  5, 10, 10,  5,  5,-10},
+                {-10,  0,  5, 10, 10,  5,  0,-10},
+                {-10,  0,  0,  0,  0,  0,  0,-10},
+                {-20,-10,-10,-10,-10,-10,-10,-20}
+            };
+        }
     }
 
     @Override

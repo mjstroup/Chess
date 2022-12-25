@@ -12,20 +12,10 @@ import src.Pieces.*;
 
 public class Engine {
     //TODO: fix "Mate in #" messages!
-    //TODO: piece maps!
-    //TODO: endgame weights!
-    private static final int[][] kingEndPoints = new int[][]{
-        {15,12,12,12,12,12,12,15},
-        {12,8,8,8,8,8,8,12},
-        {12,8,3,3,3,3,8,12},
-        {12,8,3,0,0,3,8,12},
-        {12,8,3,0,0,3,8,12},
-        {12,8,3,3,3,3,8,12},
-        {12,8,8,8,8,8,8,12},
-        {15,12,12,12,12,12,12,15}
-    };
+    
     private int SEARCH_DEPTH;
     private static Move bestMove;
+    private static final double ENDGAME_MULTIPLIER = 0.0006;
     private static int positions = 0;
     public Engine(int depth) {
         this.SEARCH_DEPTH = depth;
@@ -37,11 +27,12 @@ public class Engine {
             }
         }
         LocalTime start = LocalTime.now();
-        int eval = -1*alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH);
+        int perspective = Board.whiteTurn ? 1 : -1;
+        int eval = perspective*alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH);
         b.remoteMove(bestMove);
         LocalTime end = LocalTime.now();
         long ms = start.until(end, ChronoUnit.MILLIS);
-        String evalS = eval + "";
+        String evalS = eval/100. + "";
         if (eval >= 1000000) {
             evalS = "Mate in " + eval%10;
         } else if (eval <= -1000000) {
@@ -82,8 +73,8 @@ public class Engine {
         int index = (int)(Math.random()*possibleMoves.size());
         Move move = new Move(possibleMoves.get(index));
         b.remoteMove(move);
-        int eval = evaluate(b, 0);
-        String evalS = eval + "";
+        int eval = evaluate(b,1);
+        String evalS = eval/100. + "";
         if (eval > 1000000) {
             evalS = "Mate in " + eval%10;
         }
@@ -102,56 +93,95 @@ public class Engine {
             return 0;
         }
         int eval = 0;
+        int whiteMaterial = 0;
+        int blackMaterial = 0;
+        int whiteNoPawns = 0;
+        int blackNoPawns = 0;
         int whiteEval = 0;
         int blackEval = 0;
         for (int i = 0; i < Board.pieces.length; i++) {
-            for (int j = 0; j < Board.pieces.length; j++) {
+            for (int j = 0; j < Board.pieces[0].length; j++) {
                 Piece p = Board.pieces[i][j];
                 if (p instanceof EmptySquare) continue;
-                if (p.white)
-                    whiteEval += p.value;
-                else
-                    blackEval -= p.value;
+                if (p.white) {
+                    whiteMaterial += p.value;
+                    if (!(p instanceof Pawn))
+                        whiteNoPawns += p.value;
+                } else {
+                    blackMaterial += p.value;
+                    if (!(p instanceof Pawn))
+                        blackNoPawns += p.value;
+                }
             }
         }
-        // int materialCount = whiteEval-blackEval;
-        // double whiteWeight = endGameWeight(true);
-        // double blackWeight = endGameWeight(false);
-        // whiteEval += endGameEval(true, whiteWeight, materialCount);
-        // blackEval += endGameEval(false, blackWeight, materialCount);
+        double whiteWeight = endGameWeight(whiteNoPawns);
+        double blackWeight = endGameWeight(blackNoPawns);
+
+        whiteEval += whiteMaterial;
+        blackEval += blackMaterial;
+
+        whiteEval += pieceTableEval(true, whiteWeight);
+        blackEval += pieceTableEval(false, blackWeight);
+
+
+        whiteEval += endGameEval(true, whiteMaterial, blackMaterial, whiteWeight);
+        blackEval += endGameEval(false, blackMaterial, whiteMaterial, blackWeight);
+
         eval = whiteEval-blackEval;
         int perspective = Board.whiteTurn ? 1 : -1;
         return eval * perspective;
     }
 
-    public double endGameWeight(boolean white) {
-        int eval = 0;
-        for (int i = 0; i < Board.pieces.length; i++) {
-            for (int j = 0; j < Board.pieces.length; j++) {
-                Piece p = Board.pieces[i][j];
-                if (p instanceof Pawn || p instanceof EmptySquare) continue;
-                if (p.white == white)
-                    eval += p.value;
-            }
-        }
-        if (!white) eval*=-1;
-        return 1-Math.min(1, eval*0.0006);
+    public double endGameWeight(int material) {
+        //from 0 to 1
+        return 1 - Math.min(1, material*ENDGAME_MULTIPLIER);
     }
 
-    public int endGameEval(boolean white, double endGameWeight, int material) {
-        double endGameEval = 0;
-        //ensure calling team is more than 3 points (enough to checkmate) ahead
-        if ((white && material > 2) || (!white && material < -2)) {
-            King ourKing = white ? Board.whiteKing : Board.blackKing;
+    public int endGameEval(boolean white, int friendlyMaterial, int opponentMaterial, double weight) {
+        int endGameEval = 0;
+        if (friendlyMaterial > opponentMaterial + 200 && weight > 0) {
+            King friendlyKing = white ? Board.whiteKing : Board.blackKing;
             King enemyKing = white ? Board.blackKing : Board.whiteKing;
-            endGameEval+=kingEndPoints[enemyKing.rlocation][enemyKing.clocation]*10;
 
-            int orthogDistance = Math.abs(ourKing.rlocation-enemyKing.rlocation)+Math.abs(ourKing.clocation-enemyKing.clocation);
-            endGameEval += (14-orthogDistance)*3;
+            //maximize distance of enemy king from center
+            int rFromCenter = Math.max(3 - enemyKing.rlocation, enemyKing.rlocation - 4);
+            int cFromCenter = Math.max(3 - enemyKing.clocation, enemyKing.clocation - 4);
+            int totalFromCenter = rFromCenter + cFromCenter;
 
-            return (int)(endGameEval*endGameWeight*0.25);
+            endGameEval += totalFromCenter*10;
+
+            //minimize distance between kings
+            int rDist = Math.abs(friendlyKing.getR() - enemyKing.getR());
+            int cDist = Math.abs(friendlyKing.getC() - enemyKing.getC());
+            int totalDist = rDist + cDist;
+            
+            endGameEval += (14-totalDist)*5;
+
+            return (int)(endGameEval * weight);
         }
+        
         return 0;
+    }
+
+    public int pieceTableEval(boolean white, double endgameWeight) {
+        int val = 0;
+        for (int i = 0; i < Board.pieces.length; i++) {
+            for (int j = 0; j < Board.pieces[0].length; j++) {
+                Piece p = Board.pieces[i][j];
+                if (p.white == white && (p instanceof King)) {
+                    int bonus;
+                    if (endgameWeight >= 0.4) {
+                        bonus = King.endMapping[p.getR()][p.getC()];
+                    } else {
+                        bonus = p.mapping[p.getR()][p.getC()];
+                    }
+                    val += bonus;
+                } else if (p.white == white && !(p instanceof EmptySquare)) {
+                    val += p.mapping[p.getR()][p.getC()];
+                }
+            }
+        }
+        return val;
     }
 
     public int alphaBetaMax(Board board, int alpha, int beta, int depth) {
@@ -229,18 +259,18 @@ public class Engine {
                 }
             } else {
                 int offset = startingPiece.white ? -1 : 1;
-                if ((startingPiece.white && startingPiece.rlocation != 0) || (!startingPiece.white && startingPiece.rlocation != 7)) {
-                    if (startingPiece.clocation == 0) {
-                        if (Board.pieces[startingPiece.rlocation+offset][startingPiece.clocation+1] instanceof Pawn) {
+                if ((startingPiece.white && startingPiece.getR() != 0) || (!startingPiece.white && startingPiece.getR() != 7)) {
+                    if (startingPiece.getC() == 0) {
+                        if (Board.pieces[startingPiece.getR()+offset][startingPiece.getC()+1] instanceof Pawn) {
                             score -= 3;
                         }
-                    } else if (startingPiece.clocation == 7) {
-                        if (Board.pieces[startingPiece.rlocation+offset][startingPiece.clocation-1] instanceof Pawn) {
+                    } else if (startingPiece.getC() == 7) {
+                        if (Board.pieces[startingPiece.getR()+offset][startingPiece.getC()-1] instanceof Pawn) {
                             score -= 3;
                         }
                     } else {
-                        Piece r = Board.pieces[startingPiece.rlocation+offset][startingPiece.clocation+1];
-                        Piece l = Board.pieces[startingPiece.rlocation+offset][startingPiece.clocation-1];
+                        Piece r = Board.pieces[startingPiece.getR()+offset][startingPiece.getC()+1];
+                        Piece l = Board.pieces[startingPiece.getR()+offset][startingPiece.getC()-1];
                         if (r instanceof Pawn || l instanceof Pawn) {
                             score -= 3;
                         }

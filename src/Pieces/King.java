@@ -6,13 +6,46 @@ import src.Game.Move;
 public class King extends Piece {
     public boolean queenCastleRights = false;
     public boolean kingCastleRights = false;
+    public static final int[][] endMapping = new int[][]{
+        {-50,-40,-30,-20,-20,-30,-40,-50},
+        {-30,-20,-10,  0,  0,-10,-20,-30},
+        {-30,-10, 20, 30, 30, 20,-10,-30},
+        {-30,-10, 30, 40, 40, 30,-10,-30},
+        {-30,-10, 30, 40, 40, 30,-10,-30},
+        {-30,-10, 20, 30, 30, 20,-10,-30},
+        {-30,-30,  0,  0,  0,  0,-30,-30},
+        {-50,-30,-30,-30,-30,-30,-30,-50}
+    };
     public King (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
         this.clocation = clocation;
         this.white = white;
         this.abbreviation = 'k';
         this.value = 0;
-        fileName = this.white ? "Images/wK.png" : "Images/bK.png";
+        this.fileName = this.white ? "Images/wK.png" : "Images/bK.png";
+        if (this.white) {
+            this.mapping = new int[][]{
+                {-30,-40,-40,-50,-50,-40,-40,-30},
+                {-30,-40,-40,-50,-50,-40,-40,-30},
+                {-30,-40,-40,-50,-50,-40,-40,-30},
+                {-30,-40,-40,-50,-50,-40,-40,-30},
+                {-20,-30,-30,-40,-40,-30,-30,-20},
+                {-10,-20,-20,-20,-20,-20,-20,-10},
+                { 20, 20,  0,  0,  0,  0, 20, 20},
+                { 20, 30, 10,  0,  0, 10, 30, 20}
+            };
+        } else {
+            this.mapping = new int[][]{
+                { 20, 30, 10,  0,  0, 10, 30, 20},
+                { 20, 20,  0,  0,  0,  0, 20, 20},
+                {-10,-20,-20,-20,-20,-20,-20,-10},
+                {-20,-30,-30,-40,-40,-30,-30,-20},
+                {-30,-40,-40,-50,-50,-40,-40,-30},
+                {-30,-40,-40,-50,-50,-40,-40,-30},
+                {-30,-40,-40,-50,-50,-40,-40,-30},
+                {-30,-40,-40,-50,-50,-40,-40,-30},
+            };
+        }
     }
 
     @Override

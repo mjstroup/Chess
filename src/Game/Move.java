@@ -125,6 +125,9 @@ public class Move {
         }
 
         boolean isCapture = !(endingPiece instanceof EmptySquare);
+        if (startingPiece instanceof Pawn && endingPiece instanceof EmptySquare && startingPiece.clocation != endingPiece.clocation) {
+            isCapture = true;
+        }
         boolean isPromotion = promCharacter != Character.UNASSIGNED;
         /*
          * 0 -> no disambiguation needed

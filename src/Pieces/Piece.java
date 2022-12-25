@@ -9,12 +9,13 @@ public class Piece {
     public boolean white;
     public int rlocation;
     public int clocation;
+    public double value;
+    public int[][] mapping;
     public ArrayList<Move> getPossibleMoves(){return null;}
     public ArrayList<Move> getPinnedMoves(){return null;}
     public ArrayList<Move> getAttackingMoves(){return null;}
     public Piece clonePiece(){return null;}
     public static final String defaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    public double value;
 
     public int getR() {
         return this.rlocation;

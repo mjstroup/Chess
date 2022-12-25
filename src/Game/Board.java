@@ -50,6 +50,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private JLabel piece;
     private boolean moveIsCapture = false;
     private Stack<Gamestate> previousGamestates;
+
+    //TODO: finish move before waiting for engine move.
     
     public Board(String FENString) {
         this(FENString, null);
@@ -238,7 +240,14 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 passantPiece = (Pawn)pieces[destination.getR()-1][destination.getC()];
             }
             //remove EP pawn label
-            pieceToComponent(pieces[passantPiece.getR()][passantPiece.getC()]).getParent().remove(0);
+            Component EPpawn = pieceToComponent(pieces[passantPiece.getR()][passantPiece.getC()]);
+            Container parent;
+            if (EPpawn instanceof JPanel) {
+                parent = (Container)(EPpawn);
+            } else {
+                parent = EPpawn.getParent();
+            }
+            parent.remove(0);
             //set EP piece to empty square
             Board.pieces[passantPiece.getR()][passantPiece.getC()] = new EmptySquare(passantPiece.getR(), passantPiece.getC());
             ((EmptySquare)destination).enPassant = false;
@@ -649,7 +658,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         Piece destination = move.endingPiece;
         if (clone.startingPiece instanceof King && Math.abs(clone.startingPiece.getC() - clone.endingPiece.getC()) > 1) {
             //last move was a castle
-            int row = movingPiece.rlocation;;
+            int row = movingPiece.rlocation;
             if (clone.endingPiece.getC() == 6) {
                 //king side
                 //rook
@@ -729,6 +738,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     public Component pieceToComponent(Piece p) {
         return chessBoard.findComponentAt(p.getC()*99+50, p.getR()*99+50);
     }
+
     public boolean isWhitePanel(Component c) {
         return (c.getX()+50/99 + c.getY()+50/99) % 2 == 0;
     }

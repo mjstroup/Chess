@@ -9,11 +9,31 @@ public class Knight extends Piece {
         this.clocation = clocation;
         this.white = white;
         this.abbreviation = 'n';
-        if (white)
-            this.value = 3;
-        else
-            this.value = -3;
-        fileName = this.white ? "Images/wN.png" : "Images/bN.png";
+        this.value = 320;
+        this.fileName = this.white ? "Images/wN.png" : "Images/bN.png";
+        if (this.white) {
+            this.mapping = new int[][]{
+                {-50,-40,-30,-30,-30,-30,-40,-50},
+                {-40,-20,  0,  0,  0,  0,-20,-40},
+                {-30,  0, 10, 15, 15, 10,  0,-30},
+                {-30,  5, 15, 20, 20, 15,  5,-30},
+                {-30,  0, 15, 20, 20, 15,  0,-30},
+                {-30,  5, 10, 15, 15, 10,  5,-30},
+                {-40,-20,  0,  5,  5,  0,-20,-40},
+                {-50,-40,-30,-30,-30,-30,-40,-50}
+            };
+        } else {
+            this.mapping = new int[][]{
+                {-50,-40,-30,-30,-30,-30,-40,-50},
+                {-40,-20,  0,  5,  5,  0,-20,-40},
+                {-30,  5, 10, 15, 15, 10,  5,-30},
+                {-30,  0, 15, 20, 20, 15,  0,-30},
+                {-30,  5, 15, 20, 20, 15,  5,-30},
+                {-30,  0, 10, 15, 15, 10,  0,-30},
+                {-40,-20,  0,  0,  0,  0,-20,-40},
+                {-50,-40,-30,-30,-30,-30,-40,-50}
+            };
+        }
     }
 
     @Override

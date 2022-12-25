@@ -9,11 +9,31 @@ public class Rook extends Piece {
         this.clocation = clocation;
         this.white = white;
         this.abbreviation = 'r';
-        if (white)
-            this.value = 5;
-        else
-            this.value = -5;
-        fileName = this.white ? "Images/wR.png" : "Images/bR.png";
+        this.value = 500;
+        this.fileName = this.white ? "Images/wR.png" : "Images/bR.png";
+        if (this.white) {
+            this.mapping = new int[][]{
+                { 0,  0,  0,  0,  0,  0,  0,  0},
+                { 5, 10, 10, 10, 10, 10, 10,  5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                { 0,  0,  0,  5,  5,  0,  0,  0}
+            };
+        } else {
+            this.mapping = new int[][]{
+                { 0,  0,  0,  5,  5,  0,  0,  0},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                {-5,  0,  0,  0,  0,  0,  0, -5},
+                { 5, 10, 10, 10, 10, 10, 10,  5},
+                { 0,  0,  0,  0,  0,  0,  0,  0},
+            };
+        }
     }
 
     @Override
