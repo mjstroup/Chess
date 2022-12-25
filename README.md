@@ -1,7 +1,5 @@
 # Chess Engine
 
-![Image](https://github.com/mjstroup/Images/blob/main/chess.png)
-
 # Table of Contents
 - [1. Overview](#1-overview)
 - [2. Move Generation](#2-move-generation)
@@ -18,9 +16,10 @@
   - [3.5. Opening Book](#35-opening-book)
 - [4. Usage](#4-usage)
 - [5. Credits](#5-credits)
-  
-
+ 
 # 1. Overview
+
+![Image](https://github.com/mjstroup/Images/blob/main/chess.png)
 
 When I started this project, I didn't realize how deep of a rabbit hole chess programming was. There are articles and articles of algorithms, optimizations, and history on chessprogramming.org. Chess has been a passion of mine for over ten years, so it's really nice to pay tribute to it with this project.
 
@@ -32,7 +31,7 @@ This project utilizes these algorithms and optimizations to create a chess AI th
 
 ## 2.1. [Pins](https://en.wikipedia.org/wiki/Pin_(chess))
 
-One of the trickest parts about move generation in chess programming is dealing with pins. There are two types of pins that must be dealt with called absolute pins and partial pins. 
+One of the trickiest parts about move generation in chess programming is dealing with pins. There are two types of pins that must be dealt with called absolute pins and partial pins. 
 
 An absolute pin occurs when the pinned piece is unable to move completely without revealing its own king. These are most common when Knights are pinned, but can also occur when Bishops and Rooks are pinned along files/ranks and diagonals respectively. Queens can never be absolutely pinned, but will be restricted to movement in just one direction.
 
@@ -57,16 +56,16 @@ Once it is verified that the piece is pinned, the type of pin must be identified
 
 ## 2.2. [Checks](https://en.wikipedia.org/wiki/Check_(chess))
 
-One of the original ways that I tried to deal with resolving and preventing checks from being encountered was by generating all [psuedo-legal moves](https://www.chessprogramming.org/Pseudo-Legal_Move), playing them on the board, verifying whether or not the move resulted in a check, then undoing the move. This process would be done for every possible pseudo-legal move for every piece, and proved to be extremely slow. 
+One of the original ways that I tried to deal with resolving and preventing checks from being encountered was by generating all [pseudo-legal moves](https://www.chessprogramming.org/Pseudo-Legal_Move), playing them on the board, verifying whether or not the move resulted in a check, then undoing the move. This process would be done for every possible pseudo-legal move for every piece, and proved to be extremely slow. 
 
 From there, I decided to switch to a more manual approach to resolve/prevent checks whilst generating moves, which resulted in three cases.
 
 1. The king is not in check, generate all possible moves and return.
 2. The king is checked by one piece and has three ways of resolving the check.
-   1. Capture the checking piece with a non-pinned piece.
+   1. Capture the checking piece with a non-absolutely pinned piece.
    2. Block the check, if the checking piece is sliding (i.e. Bishop, Rook, or Queen), with a non-pinned piece.
    3. Move the king to a non-attacked square
-3. The king is checked by two pieces, in which case the king must move to a non-attacked piece.
+3. The king is checked by two pieces, in which case the king must move to a non-attacked piece, note that sliding pieces x-ray the king.
 
 The only tricky part about this method is the "non-pinned piece" specification, which required some reworking of how moves were generated as described in [2.1](#21-pins).
 
@@ -116,7 +115,7 @@ To ensure all of the game's niche rules were followed accurately, performance te
         return positions;
     }
 
-The perft algorithm utilizes depth-based backtracking to explore all possible positions up to a certain depth. The added if statement is an optimization called bulk-counting, which essentially skips depth 0 searhing, as it will always return moves.size().
+The perft algorithm utilizes depth-based backtracking to explore all possible positions up to a certain depth. The added if statement is an optimization called bulk-counting, which essentially skips depth 0 searching, as it will always return moves.size().
 
 These tests are available to see in [src/Testing](https://github.com/mjstroup/Chess/blob/master/src/Testing/GenerationTest.java). 
 
@@ -134,7 +133,7 @@ Minimax does however waste a bunch of time calculating lines it does not have to
 
 ![Image](https://github.com/mjstroup/Images/blob/main/a-bp.png)
 
-Alpha-beta pruning is an optimization done to minimax in which two values, alpha and beta, representing the minimum score that the maximizing player is guaranteed and the maximum score that the minimizing player is guaranteed respectively. Starting out, alpha is negative infinity and beta is positive infinity, as neither player is assured of any score.
+Alpha-beta pruning is an optimization done to minimax in which two values, alpha and beta, representing the minimum score that the maximizing player is guaranteed and the maximum score that the minimizing player is guaranteed respectively, are stored. Starting out, alpha is negative infinity and beta is positive infinity, as neither player is assured of any score.
 
 As the move tree is filled out, whenever the maximizing player encounters a value that is greater than beta, it is ensured that the optimal move does not belong to this branch, as the minimizing player will never opt to choose a potentially larger-scored branch within the move tree when it can choose its guaranteed worst-case maximum score, beta. Therefore, the rest of the branch does not need to be calculated and can be pruned. 
 
@@ -144,7 +143,7 @@ The optimizations that occur with Alpha-beta pruning are somewhat luck based, as
 
 ## 3.3. [Move Ordering](https://www.chessprogramming.org/Move_Ordering)
 
-Move ordering is extremely simple to do for how effective of an optimization it is. Each move gets assigned a "score", and then the moves are sorted base on their score and then evaluated by Alpha-beta pruning. 
+Move ordering is extremely simple to do for how effective of an optimization it is. Each move gets assigned a "score", the moves are sorted based on these scores, and then they are evaluated by Alpha-beta pruning. 
 
 The way I implemented move ordering is by incentivising a couple of behaviors such as capturing a high valued piece with a low valued piece, promoting pawns, and capturing pieces with pawns. This could be further optimized by incentivising checks as well.
 
