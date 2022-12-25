@@ -9,12 +9,13 @@
   - [2.2. Checks](#22-checks)
   - [2.3. En Passant Tricks](#23-en-passant-tricks)
   - [2.4. FEN Notation](#24-fen-notation)
-  - [2.5. Testing](#25-testing)
+  - [2.5. Algebraic Notation](#25-algebraic-notation)
 - [3. Engine](#3-engine)
   - [3.1. Minimax](#31-minimax)
   - [3.2 Alpha-beta Pruning](#32-alpha-beta-pruning)
   - [3.3. Move Ordering](#33-move-ordering)
   - [3.4. Endgame Optimizations](#34-endgame-optimizations)
+  - [3.5. Opening Book](#35-opening-book)
 - [4. Usage](#4-usage)
 - [5. Credits](#5-credits)
   
@@ -95,7 +96,7 @@ FEN notation is one of the best ways to represent a chess game's state in a comp
 
 This notation was a great quality-of-life addition, as it allowed me to quickly load in specific games to debug and test. It was also essential to certain features such as [threefold repetition](https://en.wikipedia.org/wiki/Threefold_repetition).
 
-## 2.5. Testing
+## 2.5. [Algebraic Notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess))
 
 To ensure all of the game's niche rules were followed accurately, performance testing was done using [various positions](https://www.chessprogramming.org/Perft_Results) to a depth of five ply.
 
@@ -148,6 +149,8 @@ Move ordering is extremely simple to do for how effective of an optimization it 
 The way I implemented move ordering is by incentivising a couple of behaviors such as capturing a high valued piece with a low valued piece, promoting pawns, and capturing pieces with pawns. This could be further optimized by incentivising checks as well.
 
 ## 3.4. Endgame Optimizations
+
+
 
 # 4. Usage
 
