@@ -227,8 +227,6 @@ To compute these statistics for my engine, I pitted it up against Stockfish 14, 
 
 </details>
 
-<br>
-
 To quantify elo based on these scores, we can look at [Chess.com's study](https://www.chess.com/article/view/better-than-ratings-chess-com-s-new-caps-system) of the correlation between CAPS score and elo, suggesting that a player with an average CAPS of 0.851 would fall between the elo range of 1700 and 1800. For ACPL, we can look at a [study](https://kwojcicki.github.io/blog/CHESS-BLUNDERS#f1) done by Krystian Wojcicki, which collected data from around 2500 games, providing around 5000 ACPL/elo samples, suggesting that the elo of a player with an average ACPL of 40.5 would fall between 2700 and 2800.
 
 Elo is incredibly hard to quantify with just these two statistics, especially when the sampled games were taken from games against one of the top engines in the world, in which every game was a loss. To determine a much more accurate elo, this engine would have to be converted to be [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible and submitted to a database of other engines with comparable strengths, with a much large dataset of games against various opponents.
