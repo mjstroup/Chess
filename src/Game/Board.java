@@ -16,10 +16,11 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 import java.io.*;
+import java.text.DecimalFormat;
 
 import javax.sound.sampled.*;
 
-public class Board extends JFrame  implements MouseListener, MouseMotionListener{
+public class Board extends JFrame implements MouseListener, MouseMotionListener {
     final Color light = new Color(240,217,181);
     final Color dark = new Color(181,136,99);
     final Color lightCover = new Color(174,177,136);
@@ -33,6 +34,15 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     public static boolean whiteTurn = true;
     public static Piece[][] pieces;
     public static String gameLog = "";
+    public int eval;
+    public boolean canPickUp = true;
+    /*
+     * 0 -> game is in session
+     * 1 -> white won
+     * 2 -> black won
+     * 3 -> stalemate
+     */
+    public int gameOver = 0;
     private static Engine engine;
     private static int halfMoveCount = 0;
     private static int fullMoveCount = 1;
@@ -41,6 +51,8 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private ArrayList<Move> currentMoves;
     private JLayeredPane layeredPane;
     private JPanel chessBoard;
+    private JPanel whiteEvalPanel;
+    private JPanel blackEvalPanel;
     private JPanel originalPanel;
     private JPanel currentPanel;
     private Color currentPanelColor;
@@ -50,40 +62,56 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     private JLabel piece;
     private boolean moveIsCapture = false;
     private Stack<Gamestate> previousGamestates;
-
-    //TODO: finish move before waiting for engine move.
     
     public Board(String FENString) {
         this(FENString, null);
     }
     public Board(String FENString, Engine e) {
         engine = e;
+        eval = 0;
         repeatMap = new HashMap<>();
         repeatMap.put(FENString.substring(0, Board.ordinalIndexOf(FENString, " ", 4)), 1);
         previousGamestates = new Stack<>();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pieces = fenStringToPieces(FENString);
+
+        Dimension layeredSize = new Dimension(830,800);
         Dimension size = new Dimension(800,800);
         layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
-        layeredPane.setPreferredSize(size);
+        layeredPane.setPreferredSize(layeredSize);
         layeredPane.addMouseListener(this);
         layeredPane.addMouseMotionListener(this);
+
+        whiteEvalPanel = new JPanel();
+        blackEvalPanel = new JPanel();
+        
+        whiteEvalPanel.setBackground(Color.WHITE);
+        blackEvalPanel.setBackground(Color.BLACK);
+
+        whiteEvalPanel.setBorder(new LineBorder(Color.BLACK));
+        blackEvalPanel.setBorder(new LineBorder(Color.BLACK));
+        
+        updateEvalPanels(eval);
+
+        layeredPane.add(whiteEvalPanel);
+        layeredPane.add(blackEvalPanel);
+
         chessBoard = new JPanel(new GridLayout(8,8));
         chessBoard.setBorder(new LineBorder(Color.BLACK));
 
         layeredPane.add(chessBoard, JLayeredPane.DEFAULT_LAYER);
         chessBoard.setPreferredSize(size);
         chessBoard.setBounds(0,0,size.width,size.height);
-
+        
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
                 JPanel square = new JPanel(new BorderLayout());
                 chessBoard.add(square);
                 if ((r + c) % 2 == 0)
-                    square.setBackground(light);
+                square.setBackground(light);
                 else 
-                    square.setBackground(dark);
+                square.setBackground(dark);
                 if (!(pieces[r][c] instanceof EmptySquare)) {
                     JLabel label = new JLabel();
                     Image image = (new ImageIcon(pieces[r][c].fileName)).getImage();
@@ -93,10 +121,131 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
                 }
             }
         }
+
+        pack();
+        setResizable(false);
+        setLocationRelativeTo(null);
+        setVisible(true);
+        Board b = this;
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (engine != null && engine.white) {
+                    engine.playMove(b);
+                }
+            }
+        });
+        t.start();
+    }
+
+    public void updateEvalPanels(double eval) {
+        whiteEvalPanel.removeAll();
+        blackEvalPanel.removeAll();
+        //checkmate and stalemate
+        if (gameOver == 1) {
+            eval = 1000000;
+        } else if (gameOver == 2) {
+            eval = -1000000;
+        }
+        if (gameOver == 3) {
+            Dimension whiteEvalSize = new Dimension(30, 400);
+            Dimension blackEvalSize = new Dimension(30, 400);
+            whiteEvalPanel.setPreferredSize(whiteEvalSize);
+            blackEvalPanel.setPreferredSize(blackEvalSize);
+
+            blackEvalPanel.setBounds(800, 0, blackEvalSize.width, blackEvalSize.height);
+            whiteEvalPanel.setBounds(800, blackEvalSize.height, whiteEvalSize.width, whiteEvalSize.height);
+            JLabel whiteEvalLabel = new JLabel("1/2");
+            JLabel blackEvalLabel = new JLabel("1/2");
+            whiteEvalLabel.setForeground(Color.BLACK);
+            blackEvalLabel.setForeground(Color.WHITE);
+            whiteEvalPanel.add(whiteEvalLabel);
+            blackEvalPanel.add(blackEvalLabel);
+            
+            return;
+        }
+        if (eval <= -1000000) {
+            //m black
+            Dimension whiteEvalSize = new Dimension(30, 0);
+            Dimension blackEvalSize = new Dimension(30, 800);
+            whiteEvalPanel.setPreferredSize(whiteEvalSize);
+            blackEvalPanel.setPreferredSize(blackEvalSize);
+
+            blackEvalPanel.setBounds(800, 0, blackEvalSize.width, blackEvalSize.height);
+            whiteEvalPanel.setBounds(800, blackEvalSize.height, whiteEvalSize.width, whiteEvalSize.height);
+            String numTurns = "M" + (int)Math.abs(eval%10);
+            if (gameOver == 2) numTurns = "1";
+            JLabel blackEvalLabel = new JLabel(numTurns);
+            blackEvalLabel.setForeground(Color.WHITE);
+            blackEvalPanel.add(blackEvalLabel);
+            return;
+        }
+        if (eval >= 1000000) {
+            //m white
+            Dimension whiteEvalSize = new Dimension(30, 800);
+            Dimension blackEvalSize = new Dimension(30, 0);
+            whiteEvalPanel.setPreferredSize(whiteEvalSize);
+            blackEvalPanel.setPreferredSize(blackEvalSize);
+
+            blackEvalPanel.setBounds(800, 0, blackEvalSize.width, blackEvalSize.height);
+            whiteEvalPanel.setBounds(800, blackEvalSize.height, whiteEvalSize.width, whiteEvalSize.height);
+            String numTurns = "M" + (int)Math.abs(eval%10);
+            if (gameOver == 1) numTurns = "1";
+            JLabel whiteEvalLabel = new JLabel(numTurns);
+            whiteEvalLabel.setForeground(Color.BLACK);
+            whiteEvalPanel.add(whiteEvalLabel);
+            return;
+        }
+        eval/=100;
+        //+10 should map to 750, -10 should map to 50
+        //400 + (eval*35)
+        int whiteSize = (int)Math.max(50, 400+(eval*35));
+        whiteSize = Math.min(whiteSize, 750);
+        int blackSize = 800-whiteSize;
+        Dimension whiteEvalSize = new Dimension(30, whiteSize);
+        Dimension blackEvalSize = new Dimension(30, blackSize);
+
+        whiteEvalPanel.setPreferredSize(whiteEvalSize);
+        blackEvalPanel.setPreferredSize(blackEvalSize);
+
+        blackEvalPanel.setBounds(800, 0, blackEvalSize.width, blackEvalSize.height);
+        whiteEvalPanel.setBounds(800, blackEvalSize.height, whiteEvalSize.width, whiteEvalSize.height);
+
+        String whiteFormat;
+        String blackFormat; 
+        if (eval >= 10 || eval <= -10) {
+            DecimalFormat df = new DecimalFormat("00.0");
+            whiteFormat = df.format(eval);
+            blackFormat = df.format(-eval);
+        } else {
+            DecimalFormat df = new DecimalFormat("0.00");
+            whiteFormat = df.format(eval);
+            blackFormat = df.format(-eval);
+        }
+
+        if (eval == 0) {
+            JLabel whiteEvalLabel = new JLabel("0.0");
+            JLabel blackEvalLabel = new JLabel("0.0");
+            whiteEvalLabel.setForeground(Color.BLACK);
+            blackEvalLabel.setForeground(Color.WHITE);
+            whiteEvalPanel.add(whiteEvalLabel);
+            blackEvalPanel.add(blackEvalLabel);
+        } else if (whiteSize > blackSize) {
+            JLabel whiteEvalLabel = new JLabel(whiteFormat);
+            whiteEvalLabel.setForeground(Color.BLACK);
+            whiteEvalPanel.add(whiteEvalLabel);
+        } else {
+            JLabel blackEvalLabel = new JLabel(blackFormat);
+            blackEvalLabel.setForeground(Color.WHITE);
+            blackEvalPanel.add(blackEvalLabel);
+        }
     }
 
     public void mousePressed(MouseEvent me) {
+        if (gameOver != 0) return;
         if (!SwingUtilities.isLeftMouseButton(me)) return;
+        if (!canPickUp) return;
+        if (me.getX() > 780 || me.getY() > 780 || me.getX() < 20 || me.getY() < 20) return;
 
         Component c = chessBoard.findComponentAt(me.getX(), me.getY());
         if (c instanceof JPanel) return;
@@ -118,8 +267,12 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void mouseDragged(MouseEvent me) {
+        //out of bounds
+        if (gameOver != 0) return;
         if (!SwingUtilities.isLeftMouseButton(me)) return;
+        if (!canPickUp) return;
         if (piece == null) return;
+        if (me.getX() > 780 || me.getY() > 780 || me.getX() < 20 || me.getY() < 20) return;
         piece.setLocation(me.getX() - 49, me.getY() - 45);
         Component c = chessBoard.findComponentAt(me.getX(), me.getY());
         //in different panel now... change old panel to original color and mark new color
@@ -159,8 +312,28 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
     }
 
     public void mouseReleased(MouseEvent me) {
+        if (gameOver != 0) return;
         if (!SwingUtilities.isLeftMouseButton(me)) return;
         if (piece == null) return;
+        if (me.getX() > 780 || me.getY() > 780 || me.getX() < 20 || me.getY() < 20) {
+            //out of bounds, return to original state
+            piece.setVisible(false);
+        
+            originalPanel.add(piece);
+
+            piece.setVisible(true);
+            currentPanel.setBackground(currentPanelColor);
+            originalPanel.setBackground(originalPanelColor);
+            piece = null;
+            currentPiece = null;
+            currentPanel = null;
+            currentPanelColor = null;
+            currentMoves = null;
+            originalPanel = null;
+            moveIsCapture = false;
+            return;
+        }
+        canPickUp = false;
         Component c = chessBoard.findComponentAt(me.getX(), me.getY());
         Piece movingPiece = currentPiece;
         Piece destination = componentToPiece(c);
@@ -204,11 +377,9 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         currentPanel.setBackground(currentPanelColor);
         originalPanel.setBackground(originalPanelColor);
         //did the move really happen..
+
         if (!returned) {
             postMove(validMoveClone);
-            if (engine != null) {
-                engine.playMove(this);
-            }
         }
         piece = null;
         currentPiece = null;
@@ -217,6 +388,24 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         currentMoves = null;
         originalPanel = null;
         moveIsCapture = false;
+        if (!returned) {
+            Board b = this;
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (engine != null) {
+                        if (gameOver == 0)
+                            engine.playMove(b);
+                        updateEvalPanels(eval);
+                        repaint();
+                        revalidate();
+                    }
+                }
+            });
+            t.start();
+        } else {
+            canPickUp = true;
+        }
     }
 
     public void movePiece(Move move) {
@@ -600,7 +789,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         Piece destination = move.endingPiece;
         JPanel startingPanel;
         JPanel endingPanel;
-        Component originalComponent = pieceToComponent(movingPiece); 
+        Component originalComponent = pieceToComponent(movingPiece);
         startingPanel = (JPanel)originalComponent.getParent();
         JLabel pieceLabel = (JLabel)originalComponent;
 
@@ -923,8 +1112,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         String winner = whiteTurn ? "black" : "white";
         System.out.println("Checkmate for " + winner + ".");
         //dispose
-        dispose();
-        System.exit(0);
+        gameOver = whiteTurn ? 2 : 1;
     }
 
     public void throwStaleMate(Move move) {
@@ -934,8 +1122,7 @@ public class Board extends JFrame  implements MouseListener, MouseMotionListener
         //announce in console
         System.out.println("Stalemate.");
         //dispose
-        dispose();
-        System.exit(0);
+        gameOver = 3;
     }
 
     public void resign(boolean white) {

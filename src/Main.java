@@ -10,16 +10,7 @@ import java.time.temporal.ChronoUnit;
 
 public class Main {
     public static void main(String[] args) {
-        Engine e = new Engine(4);
-        Board b = new Board(Piece.defaultFEN,e);
-        // Board b = new Board("8/3r4/3k4/8/8/3K4/8/8 w - - 0 1",e);
-
-        b.pack();
-        b.setResizable(false);
-        b.setLocationRelativeTo(null);
-        b.setVisible(true);
-        
-        // runGeneration(b, 5);
+        new Board(Piece.defaultFEN, new Engine(5, false));
     }
 
     public static void runGeneration(Board b, int depth) {

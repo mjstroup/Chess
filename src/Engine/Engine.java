@@ -13,12 +13,14 @@ import src.Pieces.*;
 public class Engine {
     //TODO: fix "Mate in #" messages!
     
+    public boolean white;
     private int SEARCH_DEPTH;
     private static Move bestMove;
     private static final double ENDGAME_MULTIPLIER = 0.0006;
     private static int positions = 0;
-    public Engine(int depth) {
+    public Engine(int depth, boolean white) {
         this.SEARCH_DEPTH = depth;
+        this.white = white;
     }
     public void playMove(Board b) {
         if (b.getFullMoveCount() < 5) {
@@ -29,7 +31,9 @@ public class Engine {
         LocalTime start = LocalTime.now();
         int perspective = Board.whiteTurn ? 1 : -1;
         int eval = perspective*alphaBetaMax(b, Integer.MIN_VALUE, Integer.MAX_VALUE, SEARCH_DEPTH);
+        b.eval = eval;
         b.remoteMove(bestMove);
+        if (b.gameOver != 0) return;
         LocalTime end = LocalTime.now();
         long ms = start.until(end, ChronoUnit.MILLIS);
         String evalS = eval/100. + "";
@@ -40,6 +44,7 @@ public class Engine {
         }
         System.out.println(String.format("Move: %s\tEval:%s\t\t\tPositions Evaluated: %d\tTime:%dms", bestMove, evalS, positions, ms));
         positions = 0;
+        b.canPickUp = true;
     }
 
     public boolean playDatabaseMove(Board b) {
@@ -73,7 +78,9 @@ public class Engine {
         int index = (int)(Math.random()*possibleMoves.size());
         Move move = new Move(possibleMoves.get(index));
         b.remoteMove(move);
+        if (b.gameOver != 0) return true;
         int eval = evaluate(b,1);
+        b.eval = eval;
         String evalS = eval/100. + "";
         if (eval > 1000000) {
             evalS = "Mate in " + eval%10;
@@ -82,12 +89,13 @@ public class Engine {
         long ms = start.until(end, ChronoUnit.MILLIS);
         System.out.println(String.format("Move: %s\tEval:%s\t\t\tPositions Evaluated: %d\tTime:%dms", move, evalS, positions, ms));
         //successfully played move
+        b.canPickUp = true;
         return true;
     }
 
     public int evaluate(Board board, int depth) {
         if (board.turnInCheckMate()) {
-            return -1000000-depth;
+            return -1000001-depth;
         }
         if (board.turnInStaleMate()) {
             return 0;
