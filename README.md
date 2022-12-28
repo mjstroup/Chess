@@ -133,7 +133,7 @@ Minimax does however waste a bunch of time calculating lines it does not have to
 
 ## 3.2. [Alpha-beta Pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning)
 
-![Image](https://github.com/mjstroup/Images/blob/main/Chess/a-bp.png)
+![Image](https://github.com/mjstroup/Images/blob/main/Chess/abp.png)
 
 Alpha-beta pruning is an optimization done to minimax in which two values, alpha and beta, representing the minimum score that the maximizing player is guaranteed and the maximum score that the minimizing player is guaranteed respectively, are stored. Starting out, alpha is negative infinity and beta is positive infinity, as neither player is assured of any score.
 
