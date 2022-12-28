@@ -63,9 +63,6 @@ public class Board extends JFrame implements MouseListener, MouseMotionListener 
     private boolean moveIsCapture = false;
     private Stack<Gamestate> previousGamestates;
     
-    public Board(String FENString) {
-        this(FENString, null);
-    }
     public Board(String FENString, Engine e) {
         engine = e;
         eval = 0;
@@ -164,7 +161,7 @@ public class Board extends JFrame implements MouseListener, MouseMotionListener 
             
             return;
         }
-        if (eval <= -1000000) {
+        if (eval <= -900000) {
             //m black
             Dimension whiteEvalSize = new Dimension(30, 0);
             Dimension blackEvalSize = new Dimension(30, 800);
@@ -173,14 +170,14 @@ public class Board extends JFrame implements MouseListener, MouseMotionListener 
 
             blackEvalPanel.setBounds(800, 0, blackEvalSize.width, blackEvalSize.height);
             whiteEvalPanel.setBounds(800, blackEvalSize.height, whiteEvalSize.width, whiteEvalSize.height);
-            String numTurns = "M" + (int)Math.abs(eval%10);
+            String numTurns = "M" + (int)(1000000+eval);
             if (gameOver == 2) numTurns = "1";
             JLabel blackEvalLabel = new JLabel(numTurns);
             blackEvalLabel.setForeground(Color.WHITE);
             blackEvalPanel.add(blackEvalLabel);
             return;
         }
-        if (eval >= 1000000) {
+        if (eval >= 900000) {
             //m white
             Dimension whiteEvalSize = new Dimension(30, 800);
             Dimension blackEvalSize = new Dimension(30, 0);
@@ -189,7 +186,7 @@ public class Board extends JFrame implements MouseListener, MouseMotionListener 
 
             blackEvalPanel.setBounds(800, 0, blackEvalSize.width, blackEvalSize.height);
             whiteEvalPanel.setBounds(800, blackEvalSize.height, whiteEvalSize.width, whiteEvalSize.height);
-            String numTurns = "M" + (int)Math.abs(eval%10);
+            String numTurns = "M" + (int)(1000000-eval);
             if (gameOver == 1) numTurns = "1";
             JLabel whiteEvalLabel = new JLabel(numTurns);
             whiteEvalLabel.setForeground(Color.BLACK);

@@ -37,10 +37,11 @@ public class Engine {
         LocalTime end = LocalTime.now();
         long ms = start.until(end, ChronoUnit.MILLIS);
         String evalS = eval/100. + "";
-        if (eval >= 1000000) {
-            evalS = "Mate in " + eval%10;
-        } else if (eval <= -1000000) {
-            evalS = "Mate in " + (eval*-1)%10;
+        System.out.println(eval);
+        if (eval >= 900000) {
+            evalS = "Mate in " + (1000000-eval);
+        } else if (eval <= -900000) {
+            evalS = "Mate in " + (1000000+eval);
         }
         System.out.println(String.format("Move: %s\tEval:%s\t\t\tPositions Evaluated: %d\tTime:%dms", bestMove, evalS, positions, ms));
         positions = 0;
@@ -82,9 +83,6 @@ public class Engine {
         int eval = evaluate(b,1);
         b.eval = eval;
         String evalS = eval/100. + "";
-        if (eval > 1000000) {
-            evalS = "Mate in " + eval%10;
-        }
         LocalTime end = LocalTime.now();
         long ms = start.until(end, ChronoUnit.MILLIS);
         System.out.println(String.format("Move: %s\tEval:%s\t\t\tPositions Evaluated: %d\tTime:%dms", move, evalS, positions, ms));
@@ -95,7 +93,7 @@ public class Engine {
 
     public int evaluate(Board board, int depth) {
         if (board.turnInCheckMate()) {
-            return -1000001-depth;
+            return -1000000+depth;
         }
         if (board.turnInStaleMate()) {
             return 0;
@@ -194,8 +192,9 @@ public class Engine {
 
     public int alphaBetaMax(Board board, int alpha, int beta, int depth) {
         if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
+            int mateIn = (SEARCH_DEPTH-depth)/2;
             positions++;
-            return evaluate(board, depth);
+            return evaluate(board, mateIn);
         }
         ArrayList<Move> moveList = board.getAllTurnMoves();
         //move order
@@ -220,7 +219,8 @@ public class Engine {
     public int alphaBetaMin(Board board, int alpha, int beta, int depth) {
         if (depth == 0 || board.turnInCheckMate() || board.turnInStaleMate()) {
             positions++;
-            return evaluate(board, depth) * -1;
+            int mateIn = ((SEARCH_DEPTH-depth)-1)/2;
+            return evaluate(board, mateIn) * -1;
         }
         ArrayList<Move> moveList = board.getAllTurnMoves();
         //move order
