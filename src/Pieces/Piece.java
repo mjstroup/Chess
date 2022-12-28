@@ -697,6 +697,7 @@ public class Piece {
         }   
         return list;
     }
+    
     public ArrayList<Move> getSlidingPinnedMoves() {
         ArrayList<Move> list = new ArrayList<>();
         Piece attacker = this.isPinned();

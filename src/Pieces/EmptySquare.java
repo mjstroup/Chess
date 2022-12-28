@@ -10,16 +10,19 @@ public class EmptySquare extends Piece {
         this.abbreviation = 'E';
         this.value = 0;
     }
+
     @Override
     public ArrayList<Move> getPossibleMoves() {
         ArrayList<Move> list = new ArrayList<>();
         return list;
     }
+
     @Override
     public ArrayList<Move> getAttackingMoves() {
         ArrayList<Move> list = new ArrayList<>();
         return list;
     }
+    
     public EmptySquare clonePiece() {
         EmptySquare es = new EmptySquare(this.rlocation, this.clocation);
         es.enPassant = this.enPassant;

@@ -1,6 +1,4 @@
 package src.Game;
-import javax.swing.*;
-import javax.swing.border.*;
 
 import src.Engine.Engine;
 import src.Pieces.Bishop;
@@ -17,7 +15,8 @@ import java.awt.*;
 import java.util.*;
 import java.io.*;
 import java.text.DecimalFormat;
-
+import javax.swing.*;
+import javax.swing.border.*;
 import javax.sound.sampled.*;
 
 public class Board extends JFrame implements MouseListener, MouseMotionListener {

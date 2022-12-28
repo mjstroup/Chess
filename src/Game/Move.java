@@ -9,15 +9,18 @@ public class Move {
     public char promCharacter;
     public boolean checkMate;
     public boolean check;
+
     public Move(Piece startingPiece, Piece endingPiece) {
         this.startingPiece = startingPiece;
         this.endingPiece = endingPiece;
     }
+
     public Move(Piece startingPiece, Piece endingPiece, char promCharacter) {
         this.startingPiece = startingPiece;
         this.endingPiece = endingPiece;
         this.promCharacter = promCharacter;
     }
+
     public Move(String notation) {
         boolean whiteTurn = Board.whiteTurn;
         if (notation.contains("+") || notation.contains("#")) {
@@ -109,6 +112,7 @@ public class Move {
             }
         }
     }
+
     public Piece coordsToPiece(String s) {
         char letter = s.charAt(0);
         char number = s.charAt(1);
@@ -116,6 +120,7 @@ public class Move {
         int y = letter-97;
         return Board.pieces[x][y];
     }
+    
     public String toString() {
         //castling
         if (startingPiece instanceof King) {

@@ -1,18 +1,16 @@
 package src.Engine;
 
+import src.Game.Board;
+import src.Game.Move;
+import src.Pieces.*;
+
 import java.io.*;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import src.Game.Board;
-import src.Game.Move;
-import src.Pieces.*;
-
 public class Engine {
-    //TODO: fix "Mate in #" messages!
-    
     public boolean white;
     private int SEARCH_DEPTH;
     private static Move bestMove;

@@ -16,6 +16,7 @@ public class King extends Piece {
         {-30,-30,  0,  0,  0,  0,-30,-30},
         {-50,-30,-30,-30,-30,-30,-30,-50}
     };
+    
     public King (Boolean white, int rlocation, int clocation) {
         this.rlocation = rlocation;
         this.clocation = clocation;

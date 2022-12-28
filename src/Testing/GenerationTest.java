@@ -12,7 +12,6 @@ import src.Game.Board;
 import src.Game.Move;
 
 public class GenerationTest {
-
     @Test
     public void testGenerate1() {
         System.out.println("Starting Test 1");
