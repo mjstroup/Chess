@@ -81,7 +81,7 @@ There are a couple of situations that arise involving the move En Passant that c
 
 *The white Pawn on d4 checks the black King, and exd4 EP resolves the check.*
 
-For this specific situation, I did not have the Pawn on e4 listed as an attacker for the d4 pawn, as En Passant is a temporary move that comes and goes in one [ply](https://en.wikipedia.org/wiki/Ply_(game_theory)). As a solution, I simply added a couple of lines in the check handling section of the legal move generator to verify if En Passant is possible, and adding it to the list of legal moves if it is.
+For this specific situation, I did not have the Pawn on e4 listed as an attacker for the d4 pawn, as En Passant is a temporary move that comes and goes in one [ply](https://en.wikipedia.org/wiki/Ply_(game_theory)). As a solution, I simply added a couple of lines in the check handling section of the legal move generator to verify if En Passant is possible, and added it to the list of legal moves if it is.
 
 The second and more interesting case occurs when an En Passant results in a [discovered check](https://en.wikipedia.org/wiki/Discovered_attack). 
 
@@ -151,11 +151,11 @@ The way I implemented move ordering is by incentivising a couple of behaviors su
 
 ## 3.4. Opening Book
 
-At the start of the game, the depth that minimax searches to is simply not enough to calculate optimal play for the first couple of moves. To counteract this, I downloaded about 4000 Grandmaster-level games from 50 tournaments within the last ten years in which the computer can choose opening sequences from. Up until move five, it looks into its game database, finds all positions in which the current position has occured, and then chooses a random move from those positions. These moves puts the engine in a much better opening position where its evaluations will be much more meaningful.
+At the start of the game, the depth that minimax searches to is simply not enough to calculate optimal play for the first couple of moves. To counteract this, I downloaded about 4000 Grandmaster-level games from 50 tournaments within the last ten years in which the computer can choose opening sequences from. Up until move five, it looks into its game database, finds all positions in which the current position has occurred, and then chooses a random move from those positions. These moves put the engine in a much better opening position where its evaluations will be much more meaningful.
 
 ## 3.5. [Piece Square Tables](https://www.chessprogramming.org/Piece-Square_Tables)
 
-Past the opening book, the engine was getting a little big confused as to what it was supposed to do if it cannot find a guaranteed advantage within the next couple of moves. If the current evaluation is +1 for the computer, and within its search depth, the best evaluation it sees is +1, it will simply play the first move it encounters that gives this evaluation, which resulted in a lot of shuffling back and forth with its rooks. This is obviously an improper way to play Chess, as the engine should look to improve its current position when it cannot find a material advantage. 
+Past the opening book, the engine was getting confused as to what it was supposed to do if it cannot find a guaranteed advantage within the next couple of moves. If the current evaluation is +1 for the computer, and within its search depth, the best evaluation it sees is +1, it will simply play the first move it encounters that gives this evaluation, which results in a lot of shuffling back and forth with its rooks. This is obviously an improper way to play Chess, as the engine should look to improve its current position when it cannot find a material advantage. 
 
 To incentivise these positional moves, each piece has a table which quantifies positive or negative bonuses measured in [centipawns](https://www.chessprogramming.org/Centipawns), that are tacked on to each team's evaluation.
 
@@ -163,7 +163,7 @@ To incentivise these positional moves, each piece has a table which quantifies p
 
 *An example of a piece square table for a white Knight*
 
-As the table shows, the white Knight is tempted towards central squares as well as its natural development squares, and detered from edge squares. Note that for a black Knight, the table is simply mirrored along the horizontal axis.
+As the table shows, the white Knight is tempted towards central squares as well as its natural development squares, and is deterred from edge squares. Note that for a black Knight, the table is simply mirrored along the horizontal axis.
 
 ## 3.6. Endgame Optimizations
 
@@ -171,9 +171,9 @@ Once the position reaches an end game, the engine can have trouble seeing far en
 
 The first was to alter the piece square table for the King. In the beginning of the game, the King's table was constructed such that it was encouraged to stay near the corner of the board in castling position behind its pawns. However, in the endgame, this is often the place where Kings are put into checkmate. So, once a certain amount of material is lost, the Kings switch to the endgame table, encouraging them towards the center of the board, and away from the edges and corners. This not only incentivizes the engine to move its King towards the center of the board, but encourages it to push the enemy King towards the edges and corners of the board.
 
-Along with the altered table, I introduced another incentive to push the King as close to the edges and corners board as possible, giving a bonus for every file and rank it is pushed away from the center. This hightens the chance of a checkmate being found, but in situations where the allied King is needed to produce a checkmate, the engine runs into trouble.
+Along with the altered table, I introduced another incentive to push the King as close to the edges and corners board as possible, giving a bonus for every file and rank it is pushed away from the center. This heightens the chance of a checkmate being found, but in situations where the allied King is needed to produce a checkmate, the engine runs into trouble.
 
-To solve this issue, a third bonus is calculated based on how close the allied King is to the enemy King. This promotes [opposition](https://en.wikipedia.org/wiki/Opposition_(chess)), which is an important ingrediant to most checkmate patterns.
+To solve this issue, a third bonus is calculated based on how close the allied King is to the enemy King. This promotes [opposition](https://en.wikipedia.org/wiki/Opposition_(chess)), which is an important ingredient to most checkmate patterns.
 
 With these three optimizations, the engine is able to checkmate much easier with a lower depth.
 
@@ -181,7 +181,7 @@ With these three optimizations, the engine is able to checkmate much easier with
 
 Chess players are evaluated based on an [Elo rating system](https://en.wikipedia.org/wiki/Elo_rating_system), a number that increases and decreases as they play tournament games against other elo-rated players. A chess engine is much harder to quantify by an elo rating, however there are some statistics that can be compared to the average statistics of various elo rated players.
 
-The two statistics I computed is ACPL (average centipawn loss) and CAPS (Computer Aggregated Precision Score). CPL represents the total amount of centipawns lost in the evaluation per move, with ACPL averaging all of these values. CAPS is Chess.com's attempt at quantifying a player's strength at matching a top engine's moves, avoiding major mistakes/blunders, and their own algorithm for measuring patterns of strength. 
+The two statistics I computed are ACPL (average centipawn loss) and CAPS (Computer Aggregated Precision Score). CPL represents the total amount of centipawns lost in the evaluation per move, with ACPL averaging all of these values. CAPS is Chess.com's attempt at quantifying a player's strength at matching a top engine's moves, avoiding major mistakes/blunders, and their own algorithm for measuring patterns of strength. 
 
 To compute these statistics for my engine, I pitted it up against Stockfish 14, one of the strongest open-source chess engines in the world. On average, the engine's ACPL was 40.5, and the engine's CAPS was 0.851.
 
@@ -207,7 +207,7 @@ To compute these statistics for my engine, I pitted it up against Stockfish 14, 
 |    White    |     33      |       0.89      | Modern Defense |
 |    White    |     46      |       0.84      | French Horwitz Attack |
 |    White    |     35      |       0.90      | Nimzo-Indian Defense |
-|    White    |     38      |       0.85      | Scandanavian Defense |
+|    White    |     38      |       0.85      | Scandinavian Defense |
 |    Black    |     48      |       0.78      | Ruy Lopez, Morphy Defense |
 |    Black    |     42      |       0.82      | Caro-Kann, Main Line |
 |    Black    |     35      |       0.75      | Old Sicilian |
@@ -229,7 +229,7 @@ To compute these statistics for my engine, I pitted it up against Stockfish 14, 
 
 To quantify elo based on these scores, we can look at [Chess.com's study](https://www.chess.com/article/view/better-than-ratings-chess-com-s-new-caps-system) of the correlation between CAPS score and elo, suggesting that a player with an average CAPS of 0.851 would fall between the elo range of 1700 and 1800. For ACPL, we can look at a [study](https://kwojcicki.github.io/blog/CHESS-BLUNDERS#f1) done by Krystian Wojcicki, which collected data from around 2500 games, providing around 5000 ACPL/elo samples, suggesting that the elo of a player with an average ACPL of 40.5 would fall between 2700 and 2800.
 
-The reason why these two suggested elos are so far apart is because elo is incredibly hard to quantify with just these two statistics, especially when the sampled games were taken from games against one of the top engines in the world, in which every game was a loss. To determine a much more accurate elo, this engine would have to be converted to be [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible and submitted to a database of other engines with comparable strengths, with a much large dataset of games against various opponents. However, it is safe to assume that the true elo of this engine falls between these two numbers.
+The reason why these two suggested elos are so far apart is because elo is incredibly hard to quantify with just these two statistics, especially when the sampled games were taken from games against one of the top engines in the world, in which every game was a loss. To determine a much more accurate elo, this engine would have to be converted to be [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible and submitted to a database of other engines with comparable strengths, with a much larger dataset of games against various opponents. However, it is safe to assume that the true elo of this engine falls between these two numbers.
 
 # 5. Usage
 
